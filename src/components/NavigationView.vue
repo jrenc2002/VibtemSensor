@@ -7,10 +7,10 @@
           <ul class="-mx-2 space-y-1" role="list">
             <li v-for="item in navigation" :key="item.name">
               <router-link
-                  :class="[item.current ? 'bg-white text-indigo-600 shadow' : 'text-gray-700 hover:text-indigo-600 hover:bg-white hover:shadow', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold']"
+                  :class="[item.current ? 'bg-white text-[#1EA5FC] shadow' : 'text-gray-700 hover:text-[#1EA5FC] hover:bg-white hover:shadow', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold']"
                   :to="item.href">
                 <component :is="item.icon"
-                           :class="[item.current ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600', 'h-6 w-6 shrink-0']"
+                           :class="[item.current ? 'text-[#1EA5FC]' : 'text-gray-400 group-hover:text-[#1EA5FC]', 'h-6 w-6 shrink-0']"
                            aria-hidden="true"/>
                 {{ item.name }}
                 <span v-if="item.count"
@@ -31,11 +31,11 @@
           <ul class="-mx-2 mt-4 space-y-1" role="list">
             <li v-for="team in pages" :key="team.name">
               <div
-                  :class="[team.current ? 'bg-white rounded-md shadow text-indigo-600' : 'text-gray-700 hover:text-gray-600 hover:bg-white hover:shadow', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold']"
+                  :class="[team.current ? 'bg-white rounded-md shadow text-[#1EA5FC]' : 'text-gray-700 hover:text-gray-600 hover:bg-white hover:shadow', 'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold']"
                   :href="team.href" @click.prevent="changebindPage(team.id,$event)"
                   @dblclick.stop="changePageName(team.id,$event)">
                 <span
-                    :class="[team.current ? 'text-indigo-600 border-indigo-600' : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600', 'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white']">{{
+                    :class="[team.current ? 'text-[#1EA5FC] border-[#1EA5FC]' : 'text-gray-400 border-gray-200 group-hover:border-[#1EA5FC] group-hover:text-[#1EA5FC]', 'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white']">{{
                     team.id
                   }}
                 </span>
