@@ -58,8 +58,8 @@
         hover:border-[#F7BF46] sm:text-sm sm:leading-6" name="name" placeholder="请输入标定系数" type="text"/>
       </div>
       <div class=" mx-5 mt-5 h-[7%]   flex items-center justify-begin ">
-        <button class="btn btn-outline btn-success w-[45%] shadow ">确定</button>
-        <button class="btn btn-outline btn-info w-[45%] ml-[2.75rem] shadow  ">置零</button>
+        <button class="btn btn-outline text-center btn-success w-[45%] shadow ">确定</button>
+        <button class="btn btn-outline text-center btn-info w-[45%] ml-[2.75rem] shadow  ">置零</button>
       </div>
     </div>
   </div>
