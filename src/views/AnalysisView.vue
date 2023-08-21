@@ -12,13 +12,17 @@
               <div class=" sm:grid-cols-2 grid grid-cols-2 gap-4 ">
                 <dl class="mt-5 grid grid-cols-1 gap-5 ">
                   <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                    <div id="Vibrationchartid" class=" h-[15vh] relative left-0 "></div>
+                    <AnalyCharts id="2" ref="Vibrationchartid"
+                                 class=" h-[15vh] relative left-0 "
+                    ></AnalyCharts>
 
                   </div>
                 </dl>
                 <dl class="mt-5 grid grid-cols-1 gap-5 ">
                   <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-                    <div id="Temperaturechartid" class=" h-[15vh] relative left-0 "></div>
+                    <AnalyCharts id="1"
+                                 ref="Temperaturechartid"
+                                 class=" h-[15vh] relative left-0 "></AnalyCharts>
 
                   </div>
                 </dl>
@@ -35,19 +39,20 @@
 <script lang="ts" setup>
 import * as echarts from "echarts";
 import {computed, onMounted, onUnmounted, ref} from "vue";
+import AnalyCharts from "@/components/AnalyCharts.vue";
 
-
+const Temperaturechartid = ref<any>(null);
+const Vibrationchartid = ref<any>(null);
 /* ——————————————————————————声明echart—————————————————————————— */
-let dom = document.getElementById("#chart");
 let Vibrationchart;
 let Temperaturechart;
 var option;
 
 onMounted(() => {
   // chart =echarts.init(document.getElementById('comment-line'));
-  Vibrationchart = echarts.init(document.getElementById("Vibrationchartid"));
-  Temperaturechart == echarts.init(document.getElementById("Temperaturechartid"));
-  initChart();
+  // Vibrationchart = echarts.init(Temperaturechartid.value);
+  // Temperaturechart = echarts.init(Vibrationchartid.value);
+  // initChart();
 
 });
 onUnmounted(() => {
