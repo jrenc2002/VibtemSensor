@@ -1,0 +1,124 @@
+<template>
+    <div :class="[AppGlobal.isDrawerState? 'w-[calc(94vw-15rem)]':'w-[94vw]']"
+         class="transition-all duration-300 ease-in-out shadow bg-white rounded-2xl">
+        <div class="h-[10%] flex items-center bg-purple-500 w-full rounded-t-2xl">
+
+        </div>
+        <div class=" h-[90%]   w-full">
+            <div class="h-[10%] w-full">
+                <div>
+                    <div class="sm:hidden">
+                        <label class="sr-only" for="tabs">Select a tab</label>
+                        <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
+                        <select id="tabs"
+                                class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                name="tabs">
+                            <option v-for="tab in tabs" :key="tab.name" :selected="tab.id===selectTabs">{{
+                                    tab.name
+                                }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="hidden sm:block">
+                        <nav aria-label="Tabs" class="isolate flex divide-x divide-gray-200 rounded-lg shadow">
+                            <button v-for="(tab, tabIdx) in tabs" :key="tab.name"
+                                    :aria-current="tab.id===selectTabs ? 'page' : undefined"
+                                    :class="[tab.id===selectTabs ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700', tabIdx === 0 ? 'rounded-l-lg' : '', tabIdx === tabs.length - 1 ? 'rounded-r-lg' : '', 'group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10']"
+                                    @click.stop="selectTabs=tab.id">
+                                <span>{{ tab.name }}</span>
+                                <span :class="[tab.id===selectTabs ? 'bg-indigo-500' : 'bg-transparent', 'absolute inset-x-0 bottom-0 h-0.5']"
+                                      aria-hidden="true"/>
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+            </div>
+            <div class="h-[90%]  flex items-center px-4  w-full">
+                <div :class="[AppGlobal.isDrawerState? 'w-[75%]':'w-[calc(75%-11.5rem)]']"
+                     class="h-[94%] bg-white rounded-xl flex items-center   transition-all duration-300 ease-in-out flex items-center justify-center ">
+                    <GraphView id="1" ref="VibrationChartId" :data="data"
+                               class=" w-full relative left-0  "
+                    ></GraphView>
+                </div>
+                <div :class="[AppGlobal.isDrawerState? 'w-[25%]':'w-[calc(25%+11.5rem)]']"
+                     class=" h-[94%]  transition-all duration-300 ease-in-out  flex items-center justify-center">
+                    <div :class="[AppGlobal.isDrawerState? 'w-[100%]':'w-[calc(100%-12rem)]']"
+                         class=" h-full  transition-all duration-300 ease-in-out flex-col items-center justify-center ">
+                        <div class="w-[90%] bg-white rounded-md mx-5 mt-0 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                                   for="name">标定系数</label>
+                            <input id="name" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标定系数" type="text"/>
+                        </div>
+                        <div class="w-[90%] bg-white rounded-md mx-5 mt-4 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                                   for="name">报警上限</label>
+                            <input id="name" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入报警上限" type="text"/>
+                        </div>
+
+                        <div class="w-[90%] bg-white rounded-md mx-5 mt-4 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                                   for="name">标准值</label>
+                            <input id="name" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标准值" type="text"/>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</template>
+<script lang="js" setup>
+import {useAppGlobal} from '@/store/AppGlobal'
+import GraphView from "@/components/selectCharts/GraphView.vue";
+import {ref} from "vue";
+
+const selectTabs = ref(0)
+const tabs = [
+    {id: 0, name: '趋势图'},
+    {id: 1, name: '时域波形'},
+    {id: 2, name: '频域'},
+    {id: 3, name: '瀑布图'},
+    {id: 4, name: '倒频谱'},
+    {id: 5, name: '包洛图'}
+]
+const AppGlobal = useAppGlobal()
+/* ——————————————————————————时间数据配置—————————————————————————— */
+const VibrationChartId = ref(null);
+// 时间单位
+let oneDay = 24 * 3600 * 1000;
+// 初始时间原点
+let base1 = +new Date();
+let base2 = +new Date();
+let base3 = +new Date();
+// data数据
+let data1 = [[base1, Math.random() * 300]];
+for (let i = 1; i < 100; i++) {
+    let now = new Date((base1 += oneDay));
+    data1.push([+now, Math.round((Math.random() - 0.5) * 20 + data1[i - 1][1])]);
+}
+// data2数据
+let data2 = [[base2, Math.random() * 300]];
+for (let i = 1; i < 100; i++) {
+    let now = new Date((base2 += oneDay));
+    data2.push([+now, Math.round((Math.random() - 0.5) * 20 + data2[i - 1][1])]);
+}
+let data3 = [[base3, Math.random() * 300]];
+for (let i = 1; i < 100; i++) {
+    let now = new Date((base3 += oneDay));
+    data3.push([+now, Math.round((Math.random() - 0.5) * 20 + data3[i - 1][1])]);
+}
+let data = [data1, data2, data3]
+
+</script>
+<style lang="scss" scoped></style>

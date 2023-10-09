@@ -49,18 +49,21 @@ const routes: Array<RouteRecordRaw> = [
                     permiss: '1',
                 },
                 component: () => import(/* webpackChunkName: "login" */ '../views/AlarmView.vue'),
-            }
+            },
+            {
+                path: '/testview',
+                name: 'TestView',
+                meta: {
+                    title: '测试页面',
+                    permiss: '1',
+                },
+                component: () => import(/* webpackChunkName: "login" */ '../views/TestView.vue'),
+            },
+
         ]
     },
 
-    {
-        path: '/403',
-        name: 'ErrorPage',
-        meta: {
-            title: '没有权限',
-        },
-        component: () => import(/* webpackChunkName: "403" */ '../views/403.vue'),
-    },
+
 ];
 
 const router = createRouter({

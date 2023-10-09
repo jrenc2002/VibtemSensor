@@ -8,11 +8,12 @@ const route = useRoute()
 
 const state = () => {
     return {
-
         // 分页选择项
         pageChance: 1,
 
-
+        selectedDeviceIndex: -1,
+        // 侧边展开
+        isDrawerState: true,
     }
 }
 
@@ -23,10 +24,12 @@ export const useAppGlobal = defineStore('AppGlobal', {
     state,
     actions: {
 
-        updatePageChance(pageChance: number) {
-            this.pageChance = pageChance;
+        updatePageChance(newpageChance: number) {
+            this.pageChance = newpageChance;
+        },
+        updateDrawerState(newDrawerState: boolean) {
+            this.isDrawerState = newDrawerState;
         }
-
 
     },
 });

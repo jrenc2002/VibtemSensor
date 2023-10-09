@@ -7,11 +7,10 @@ import {app, BrowserWindow, protocol} from 'electron'
 
 // 导入 createProtocol 来注册 app 协议，让 Electron 可以加载 app:// URLs
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
-import {handleDatabaseApi} from './db-api'
+import {createInitDB} from './db-api'
 // 导入 electron-devtools-installer 包，用于在 Electron 应用中安装 Vue Devtools
 
-const sqlite3 = require('sqlite3').verbose();
-// let db = new sqlite3.Database('./database.db');
+
 const path = require('path');
 // 判断当前是否是开发模式
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -30,9 +29,9 @@ async function createWindow() {
     webPreferences: {
       // 使用 pluginOptions.nodeIntegration，不要修改
       // 更多信息请查看 nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration
-      // preload: path.join(__dirname, '../src/preload.js'),
-      nodeIntegration: (process.env
-          .ELECTRON_NODE_INTEGRATION as unknown) as boolean,
+      preload: path.join(__dirname, '../src/preload.js'),
+      nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean,
+
       contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
     }
   })
@@ -68,21 +67,20 @@ app.on('activate', () => {
 // 当 Electron 完成初始化并准备创建浏览器窗口时，将调用此方法
 // 某些 API 只能在此事件发生后才能使用
 app.on('ready', async () => {
-  // if (isDevelopment && !process.env.IS_TEST) {
-  //   // 安装 Vue Devtools
-  //   // try {
-  //   //   await installExtension(VUEJS3_DEVTOOLS)
-  //   // } catch (e: unknown) {
-  //   //   if (e instanceof Error) {
-  //   //     console.error('Vue Devtools failed to install:', e.message)
-  //   //   } else {
-  //   //     console.error('Vue Devtools failed to install:', e)
-  //   //   }
-  //   // }
-  // }
-  createWindow();
 
-  handleDatabaseApi();
+  // // 安装 Vue Devtools
+  // try {
+  //   await installExtension(VUEJS3_DEVTOOLS)
+  // } catch (e: unknown) {
+  //   if (e instanceof Error) {
+  //     console.error('Vue Devtools failed to install:', e.message)
+  //   } else {
+  //     console.error('Vue Devtools failed to install:', e)
+  //   }
+  // }
+
+  createWindow();
+  createInitDB();
 })
 
 // 在开发模式下，当从父进程收到请求时，优雅地退出
