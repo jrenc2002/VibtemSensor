@@ -37,9 +37,25 @@
             <div class="h-[90%]  flex items-center px-4  w-full">
                 <div :class="[AppGlobal.isDrawerState? 'w-[75%]':'w-[calc(75%-11.5rem)]']"
                      class="h-[94%] bg-white rounded-xl flex items-center   transition-all duration-300 ease-in-out flex items-center justify-center ">
-                    <GraphView id="1" ref="VibrationChartId" :data="data"
+                    <GraphView v-if="selectTabs===0" id="0" ref="VibrationChartId" :data="data"
                                class=" w-full relative left-0  "
                     ></GraphView>
+                    <TimeWaveform v-if="selectTabs===1" id="1" ref="TimeDomainChartId" :data="data"
+                                  class=" w-full relative left-0  "
+                    ></TimeWaveform>
+                    <FrequencyDomain v-if="selectTabs===2" id="2" :data="data"
+                                     class=" w-full relative left-0  ">
+                    </FrequencyDomain>
+                    <WaterFall v-if="selectTabs===3" id="3" :data="data"
+                               class=" w-full relative left-0  ">
+
+                    </WaterFall>
+                    <CepstrumView v-if="selectTabs===4" id="4" :data="data"
+                                  class=" w-full relative left-0  ">
+                    </CepstrumView>
+                    <BauLuView v-if="selectTabs===5" id="5" :data="data"
+                               class=" w-full relative left-0  ">
+                    </BauLuView>
                 </div>
                 <div :class="[AppGlobal.isDrawerState? 'w-[25%]':'w-[calc(25%+11.5rem)]']"
                      class=" h-[94%]  transition-all duration-300 ease-in-out  flex items-center justify-center">
@@ -81,6 +97,11 @@
 <script lang="js" setup>
 import {useAppGlobal} from '@/store/AppGlobal'
 import GraphView from "@/components/selectCharts/GraphView.vue";
+import BauLuView from "@/components/selectCharts/BauLuView.vue";
+import CepstrumView from "@/components/selectCharts/CepstrumView.vue";
+import FrequencyDomain from "@/components/selectCharts/FrequencyDomain.vue";
+import TimeWaveform from "@/components/selectCharts/TimeWaveform.vue";
+import WaterFall from "@/components/selectCharts/WaterFall.vue";
 import {ref} from "vue";
 
 const selectTabs = ref(0)
@@ -95,6 +116,7 @@ const tabs = [
 const AppGlobal = useAppGlobal()
 /* ——————————————————————————时间数据配置—————————————————————————— */
 const VibrationChartId = ref(null);
+const TimeDomainChartId = ref(null);
 // 时间单位
 let oneDay = 24 * 3600 * 1000;
 // 初始时间原点
