@@ -84,7 +84,6 @@ const updateWindowSize = () => {
 
 // 使用 Vue3 的生命周期钩子函数 onMounted，在组件挂载完成后添加窗口大小变化的监听事件
 onMounted(() => {
-    // TODO 设备列表的Storage开关
     // const storedData = localStorage.getItem('deviceList');
     // const deviceList = storedData!=null ? JSON.parse(storedData) : [];
     // DeviceManage.updateDeviceList( deviceList);
@@ -96,14 +95,45 @@ onMounted(() => {
             console.log(res);
         }
     );
-    // initDeviceManage();
-//   循环
-//   setInterval(() => {
-//     sendData(0)
-//   }, 5000)
+    InitSensorsData();
 
 
 });
+// 初始化数据，初始化传感器数据
+const InitSensorsData = async () => {
+    await window.Electron.ipcRenderer.invoke('get-all-substations').then(
+        (res) => {
+            DeviceManage.updateDeviceList(res);
+        }
+    );
+
+    DeviceManage.deviceList.forEach((item) => {
+        if (item && item.substation_id) {
+            let substationId = item.substation_id;
+            window.Electron.ipcRenderer.invoke('get-all-sensors-by-substation', substationId)
+                .then((res) => {
+                    // 处理数据
+                    const sensorsData = res.map(sensor => ({
+                        device_id: sensor.device_id,
+                        device_name: sensor.device_name,
+                        substation_id: sensor.substation_id,
+                        current_data: {
+                            vibration_data: 0,
+                            temperature_data: 0,
+                            vibration_threshold: 999,
+                            temperature_threshold: 999,
+                        }
+                    }));
+                    item.sensorsData = sensorsData; // assign the new data directly
+                })
+                .catch(err => {
+                    console.error("Error during IPC call:", err);
+                });
+        } else {
+            console.warn("Invalid pageChance or missing substation_id.");
+        }
+    })
+}
 
 // 使用 Vue3 的生命周期钩子函数 onUnmounted，在组件卸载之前移除窗口大小变化的监听事件
 onUnmounted(() => {
@@ -114,3 +144,6 @@ onUnmounted(() => {
 
 
 </script>
+
+
+

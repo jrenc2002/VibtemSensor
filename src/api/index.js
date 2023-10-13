@@ -2,11 +2,11 @@
 //
 // // 用户部分
 // // export const UserLogin = (data: any): Promise<any> => {
-// //     console.log(data.username, data.password)
-// //     console.log(data.username === 'root', data.password === '123456')
+// //     console.log(data.username, data.Privatekey)
+// //     console.log(data.username === 'root', data.Privatekey === '123456')
 // //
 // //     return new Promise((resolve, reject) => {
-// //         if (data.username === 'root' && data.password === '123456') {
+// //         if (data.username === 'root' && data.Privatekey === '123456') {
 // //             console.log('Resolving promise');
 // //             resolve({ message: 'Login successful' });
 // //         } else {
@@ -29,7 +29,7 @@
 //
 // // export const UserPasswordChange = (id: number, data: any) => {
 // //     return request({
-// //         url: `/auth/user/${id}/change-password`,
+// //         url: `/auth/user/${id}/change-Privatekey`,
 // //         method: 'post',
 // //         data: data
 // //     })

@@ -47,7 +47,7 @@ const line = () => {
 
         },
         legend: {
-            data: ['Fake Data', '2 Data', '1 Data']
+            data: ['Fake Data']
         },
         dataZoom: [
             {
@@ -88,24 +88,8 @@ const line = () => {
                 smooth: true,//是否平衡显示
                 symbol: 'none',//是否显示点
                 // areaStyle: {},//是否显示面积
-                data: props.data[0]
-            },
-            {
-                name: '2 Data',
-                type: 'line',
-                smooth: true,//是否平衡显示
-                symbol: 'none',//是否显示点
-                // areaStyle: {},//是否显示面积
-                data: props.data[1]
-            },
-            {
-                name: '1 Data',
-                type: 'line',
-                smooth: true,//是否平衡显示
-                symbol: 'none',//是否显示点
-                // areaStyle: {},//是否显示面积
-                data: props.data[2]
-            },
+                data: props.data
+            }
         ]
     };
 
@@ -134,11 +118,13 @@ onMounted(() => {
     setTimeout(() => {
         line();
     }, 1500);
+    console.log(props.data)
     window.addEventListener('resize', handleResize);
 });
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
 });
+/* ——————————————————————————时间数据配置—————————————————————————— */
 
 </script>
 <style lang="scss" scoped></style>

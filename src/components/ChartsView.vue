@@ -37,7 +37,7 @@
             <div class="h-[90%]  flex items-center px-4  w-full">
                 <div :class="[AppGlobal.isDrawerState? 'w-[75%]':'w-[calc(75%-11.5rem)]']"
                      class="h-[94%] bg-white rounded-xl flex items-center   transition-all duration-300 ease-in-out flex items-center justify-center ">
-                    <GraphView v-if="selectTabs===0" id="0" ref="VibrationChartId" :data="data"
+                    <GraphView v-if="selectTabs===0" id="0" ref="VibrationChartId" :data="props.data"
                                class=" w-full relative left-0  "
                     ></GraphView>
                     <TimeWaveform v-if="selectTabs===1" id="1" ref="TimeDomainChartId" :data="data"
@@ -94,7 +94,7 @@
 
 
 </template>
-<script lang="js" setup>
+<script lang="ts" setup>
 import {useAppGlobal} from '@/store/AppGlobal'
 import GraphView from "@/components/selectCharts/GraphView.vue";
 import BauLuView from "@/components/selectCharts/BauLuView.vue";
@@ -102,9 +102,14 @@ import CepstrumView from "@/components/selectCharts/CepstrumView.vue";
 import FrequencyDomain from "@/components/selectCharts/FrequencyDomain.vue";
 import TimeWaveform from "@/components/selectCharts/TimeWaveform.vue";
 import WaterFall from "@/components/selectCharts/WaterFall.vue";
-import {ref} from "vue";
+import {defineProps, onMounted, ref} from "vue";
 
-const selectTabs = ref(0)
+const props = defineProps<{
+    data: any
+}>();
+
+
+let selectTabs = ref(0)
 const tabs = [
     {id: 0, name: '趋势图'},
     {id: 1, name: '时域波形'},
@@ -117,30 +122,12 @@ const AppGlobal = useAppGlobal()
 /* ——————————————————————————时间数据配置—————————————————————————— */
 const VibrationChartId = ref(null);
 const TimeDomainChartId = ref(null);
-// 时间单位
-let oneDay = 24 * 3600 * 1000;
-// 初始时间原点
-let base1 = +new Date();
-let base2 = +new Date();
-let base3 = +new Date();
-// data数据
-let data1 = [[base1, Math.random() * 300]];
-for (let i = 1; i < 100; i++) {
-    let now = new Date((base1 += oneDay));
-    data1.push([+now, Math.round((Math.random() - 0.5) * 20 + data1[i - 1][1])]);
-}
-// data2数据
-let data2 = [[base2, Math.random() * 300]];
-for (let i = 1; i < 100; i++) {
-    let now = new Date((base2 += oneDay));
-    data2.push([+now, Math.round((Math.random() - 0.5) * 20 + data2[i - 1][1])]);
-}
-let data3 = [[base3, Math.random() * 300]];
-for (let i = 1; i < 100; i++) {
-    let now = new Date((base3 += oneDay));
-    data3.push([+now, Math.round((Math.random() - 0.5) * 20 + data3[i - 1][1])]);
-}
-let data = [data1, data2, data3]
 
+
+let data = ref(props.data);
+
+onMounted(() => {
+    console.log(data, '第二层');
+})
 </script>
 <style lang="scss" scoped></style>

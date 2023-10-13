@@ -173,6 +173,7 @@ import {BugAntIcon, ChartBarIcon, Cog8ToothIcon, ServerStackIcon, TvIcon} from '
 import {useAppGlobal} from '@/store/AppGlobal'
 // import {addDevice} from "@/api";
 import {useDeviceManage} from '@/store/DeviceManage'
+import DeviceContextMenu from "@/components/DeviceContextMenu";
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const AppGlobal = useAppGlobal()
 const ChancePage = ref(AppGlobal.pageChance)

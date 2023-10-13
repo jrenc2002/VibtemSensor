@@ -6,7 +6,7 @@ import sqlite3Lib from 'sqlite3';
 const sqlite3 = sqlite3Lib.verbose();
 const dbPath = path.join(__dirname, '../src/database.db');
 const db = new sqlite3.Database(dbPath);
-
+// todo 数据库每创建一个分站默认创建多少个传感器数据项。
 export function createInitDB(): any {
     ipcMain.handle('init-db', async (event: IpcMainInvokeEvent) => {
         console.log("Database path:", dbPath);
@@ -21,75 +21,35 @@ export function createInitDB(): any {
         };
         try {
             await runQuery(`
-                CREATE TABLE IF NOT EXISTS fermentation_batch (
-                    id INTEGER PRIMARY KEY, 
-                    batch_name TEXT,        
-                    can_number TEXT,        
-                    start_time TEXT,
-                    UNIQUE(batch_name, can_number)      
+                CREATE TABLE IF NOT EXISTS substation (
+                    substation_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- 主键，自动递增的分站ID
+                    substation_name TEXT NOT NULL,                   -- 分站名
+                    substation_ip TEXT NOT NULL,                     -- 分站IP地址
+                    substation_port INTEGER NOT NULL                 -- 分站端口
                 );
             `);
             await runQuery(`
-                CREATE TABLE IF NOT EXISTS fermentation_data (
-                            data_id INTEGER PRIMARY KEY,
-                            batch_id INTEGER,       -- 这是外键，与fermentation_batch的id对应
-                            time TEXT,              -- 时间
-                            timing_PH REAL,         -- 实时PH值
-                            acid_speed REAL,        -- 酸泵实时送料速率
-                            lye_speed REAL,         -- 碱泵实时送料速率
-                            target_PH REAL,         -- 设定目标PH
-                            acid_KP REAL,           -- 酸泵P
-                            acid_KI REAL,           -- 酸泵I
-                            acid_KD REAL,           -- 酸泵D
-                            lye_KP REAL,            -- 碱泵P
-                            lye_KI REAL,            -- 碱泵I
-                            lye_KD REAL,            -- 碱泵D
-                            acid_ml REAL,           -- 酸泵目前送料量
-                            lye_ml REAL,            -- 碱泵目前送料量
-                            acid_handle_speed_set REAL, -- 酸泵手动送料速率设置
-                            lye_handle_speed_set REAL, -- 碱泵手动送料速率设置
-                            PH_flag INTEGER,        -- PH控制开启/停止标志位
-                            Ph_auto_handle INTEGER, -- PH控制自动/手动控制标志位
-                            timing_temp REAL,       -- 实时温度值
-                            heatpower REAL,         -- 加热毯实时功率
-                            target_temp REAL,       -- 设定目标温度值
-                            Temp_KP REAL,           -- 温控KP
-                            Temp_KI REAL,           -- 温控KI
-                            Temp_KD REAL,           -- 温控KD
-                            water_flag INTEGER,     -- 冷凝水通断标志位
-                            temp_flag INTEGER,      -- 温控开启/停止标志位
-                            cool_water_autoflag INTEGER, -- 冷凝水通断控制自动/手动标志位
-                            timing_DO REAL,         -- 实时DO值
-                            oxy_ratio REAL,         -- 氧气通度
-                            target_DO REAL,         -- 设定目标DO值
-                            target_oxy_ratio REAL,  -- 设定目标氧气通度
-                            DO_KP REAL,             -- 氧含量KP
-                            DO_KI REAL,             -- 氧含量KI
-                            DO_KD REAL,             -- 氧含量KD
-                            DO_flag INTEGER,        -- 氧含量控制开启标志位
-                            target_motor_speed INTEGER, -- 电机转速
-                            timing_motor_speed INTEGER,  -- 电机实时转速
-                            motor_speed_l_limit INTEGER, -- 电机转速下限
-                            motor_speed_u_limit INTEGER, -- 电机转速上限
-                            motor_speed_autoflag INTEGER, -- 转速关联氧含量开启/关闭标志位
-                            oxy_flag INTEGER,          -- 通氧关联氧含量开启/关闭标志位
-                            clean_speed REAL,          -- 消泡泵设定送料速率
-                            clean_ml REAL,             -- 消泡泵目前送料量
-                            clean_single_time REAL,    -- 消泡单次泵入时间
-                            clean_flag INTEGER,        -- 消泡开启/停止标志位
-                            feed_speed REAL,           -- 补料泵设定补料速率
-                            feed_ml REAL,              -- 补料泵目前补料量
-                            feed_DO_cu_limit REAL,     -- 补料关联氧含量上限值
-                            feed_DO_cl_limit REAL,     -- 补料关联氧含量下限值
-                            feed_DO_connect_flag INTEGER, -- 补料关联氧含量标志位
-                            feed_flag INTEGER,         -- 补料开启/停止标志位
-                            feed_motor_connect_flag INTEGER, -- 补料关联转速标志位
-                            feed_DO_motor_connect_flag INTEGER, -- 补料双关联转速、氧含量标志位
-                            feed_motor_flag INTEGER,   -- 补料泵开启标志位
-                            feed_motor_cu_limit INTEGER,  -- 补料关联转速上限值
-                            feed_motor_cl_limit INTEGER,  -- 补料关联转速下限值
-                            start_flag INTEGER,         -- 发酵开始标志位
-                            FOREIGN KEY(batch_id) REFERENCES fermentation_batch(id)  --这是外键
+                CREATE TABLE IF NOT EXISTS sensor_device (
+                    device_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- 主键，自动递增的传感器设备ID
+                    substation_id INTEGER NOT NULL,               -- 所属的分站ID，与分站表关联
+                    device_name TEXT NOT NULL,                    -- 传感器设备的名称
+                    FOREIGN KEY (substation_id) REFERENCES substation(substation_id)  -- 外键关联到分站表的ID
+                );
+
+                );
+            `);
+            await runQuery(`
+                CREATE TABLE IF NOT EXISTS data_item (
+                    item_id INTEGER PRIMARY KEY AUTOINCREMENT,   -- 主键，自动递增的数据项ID
+                    device_id INTEGER NOT NULL,                  -- 所属的传感器设备ID，与传感器设备表关联
+                    vibration_data REAL NOT NULL,                -- 振动实时数据
+                    temperature_data REAL NOT NULL,              -- 温度实时数据
+                    vibration_threshold REAL NOT NULL,           -- 振动报警上限
+                    temperature_threshold REAL NOT NULL,         -- 温度报警上限
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,-- 数据存入时间，默认为当前时间
+                    is_hidden BOOLEAN NOT NULL DEFAULT 0,        -- 数据是否隐藏，默认为0（不隐藏）
+                    is_alerted BOOLEAN NOT NULL DEFAULT 0,       -- 数据是否报警，默认为0（无报警）
+                    FOREIGN KEY (device_id) REFERENCES sensor_device(device_id)  -- 外键关联到传感器设备表的ID
                 );
             `);
             return "数据库初始化成功";
@@ -100,99 +60,40 @@ export function createInitDB(): any {
         }
 
     });
-    ipcMain.handle('get-fermentation-batch-data', async (event: IpcMainInvokeEvent, can_number: string) => {
-        try {
-            return new Promise((resolve, reject) => {
-                const query = 'SELECT * FROM fermentation_batch WHERE can_number = ?';
-                db.all(query, [can_number], (err, rows) => {
-                    if (err) {
-                        console.error("Error fetching data from fermentation_batch:", err);
-                        reject(err);
-                    } else {
-                        resolve(rows);
-                    }
-                });
-            });
-        } catch (error) {
-            console.error("Unexpected error in get-fermentation-batch-data:", error);
-            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
-        }
-
-    });
-    ipcMain.handle('get-fermentation-data-by-batch-id', async (event: IpcMainInvokeEvent, batch_id: number) => {
-        try {
-            return new Promise((resolve, reject) => {
-                const query = 'SELECT * FROM fermentation_data WHERE batch_id = ?';
-                db.all(query, [batch_id], (err, rows) => {
-                    if (err) {
-                        console.error("Error fetching data from fermentation_data by batch_id:", err);
-                        reject(err);
-                    } else {
-                        resolve(rows);
-                    }
-                });
-            });
-        } catch (error) {
-            console.error("Unexpected error in get-fermentation-data-by-batch-id:", error);
-            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
-        }
 
 
-    });
-    // 添加新的发酵批次
-    ipcMain.handle('add-fermentation-batch', async (event: IpcMainInvokeEvent, batchData: { batch_name: string, can_number: string, start_time: string }) => {
-        try {
-            return new Promise((resolve, reject) => {
-                const query = `INSERT INTO fermentation_batch(batch_name, can_number, start_time) VALUES (?, ?, ?)`;
-                db.run(query, [batchData.batch_name, batchData.can_number, batchData.start_time], function (err: Error) {
-                    if (err) {
-                        console.error("Error adding data to fermentation_batch:", err);
-                        reject(err);
-                    } else {
-                        resolve(this.lastID);  // 返回新插入数据的ID
-                    }
-                });
-            });
-        } catch (error) {
-            console.error("Unexpected error in get-fermentation-batch:", error);
-            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
-        }
-    });
-
-    // 添加新的发酵数据
-    ipcMain.handle('add-fermentation-data', async (event: IpcMainInvokeEvent, data: any) => {
+    // 隐藏指定的数据项
+    ipcMain.handle('hide-data-item', async (event: IpcMainInvokeEvent, substation_id: number, device_id: number, item_id: number) => {
         try {
             return new Promise((resolve, reject) => {
                 const query = `
-            INSERT INTO fermentation_data(
-                batch_id, time, timing_PH, acid_speed, lye_speed, target_PH, acid_KP, acid_KI, acid_KD, 
-                lye_KP, lye_KI, lye_KD, acid_ml, lye_ml, acid_handle_speed_set, lye_handle_speed_set, 
-                PH_flag, Ph_auto_handle, timing_temp, heatpower, target_temp, Temp_KP, Temp_KI, Temp_KD, 
-                water_flag, temp_flag, cool_water_autoflag, timing_DO, oxy_ratio, target_DO, target_oxy_ratio,
-                DO_KP, DO_KI, DO_KD, DO_flag, target_motor_speed, timing_motor_speed, motor_speed_l_limit,
-                motor_speed_u_limit, motor_speed_autoflag, oxy_flag, clean_speed, clean_ml, clean_single_time, 
-                clean_flag, feed_speed, feed_ml, feed_DO_cu_limit, feed_DO_cl_limit, feed_DO_connect_flag, 
-                feed_flag, feed_motor_connect_flag, feed_DO_motor_connect_flag, feed_motor_flag, feed_motor_cu_limit, 
-                feed_motor_cl_limit, start_flag
-            ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-                db.run(query, [
-                    data.batch_id, data.time, data.timing_PH, data.acid_speed, data.lye_speed, data.target_PH, data.acid_KP,
-                    data.acid_KI, data.acid_KD, data.lye_KP, data.lye_KI, data.lye_KD, data.acid_ml, data.lye_ml,
-                    data.acid_handle_speed_set, data.lye_handle_speed_set, data.PH_flag, data.Ph_auto_handle,
-                    data.timing_temp, data.heatpower, data.target_temp, data.Temp_KP, data.Temp_KI, data.Temp_KD,
-                    data.water_flag, data.temp_flag, data.cool_water_autoflag, data.timing_DO, data.oxy_ratio, data.target_DO,
-                    data.target_oxy_ratio, data.DO_KP, data.DO_KI, data.DO_KD, data.DO_flag, data.target_motor_speed,
-                    data.timing_motor_speed, data.motor_speed_l_limit, data.motor_speed_u_limit, data.motor_speed_autoflag,
-                    data.oxy_flag, data.clean_speed, data.clean_ml, data.clean_single_time, data.clean_flag, data.feed_speed,
-                    data.feed_ml, data.feed_DO_cu_limit, data.feed_DO_cl_limit, data.feed_DO_connect_flag, data.feed_flag,
-                    data.feed_motor_connect_flag, data.feed_DO_motor_connect_flag, data.feed_motor_flag, data.feed_motor_cu_limit,
-                    data.feed_motor_cl_limit, data.start_flag
-                ], function (err: Error) {
+                UPDATE data_item
+                SET is_hidden = 1
+                WHERE device_id = (SELECT device_id FROM sensor_device WHERE substation_id = ? AND device_id = ?)
+                AND item_id = ?;
+            `;
+                db.run(query, [substation_id, device_id, item_id], (err) => {
                     if (err) {
-                        console.error("Error adding data to fermentation_data:", err);
+                        console.error("Error hiding data item:", err);
+                        reject(err);
+                    } else {
+                        resolve("数据项隐藏成功");
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in hide-data-item:", error);
+            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
+        }
+    });
+    // 新建分站
+    ipcMain.handle('add-substation', async (event: IpcMainInvokeEvent, substationData: { substation_name: string, substation_ip: string, substation_port: number }) => {
+        try {
+            return new Promise((resolve, reject) => {
+                const query = `INSERT INTO substation(substation_name, substation_ip, substation_port) VALUES (?, ?, ?)`;
+                db.run(query, [substationData.substation_name, substationData.substation_ip, substationData.substation_port], function (err: Error) {
+                    if (err) {
+                        console.error("Error adding data to substation:", err);
                         reject(err);
                     } else {
                         resolve(this.lastID);  // 返回新插入数据的ID
@@ -200,7 +101,136 @@ export function createInitDB(): any {
                 });
             });
         } catch (error) {
-            console.error("Unexpected error in get-fermentation-data:", error);
+            console.error("Unexpected error in add-substation:", error);
+            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
+        }
+    });
+    // 新建传感器设备
+    ipcMain.handle('add-sensor-device', async (event: IpcMainInvokeEvent, data: { substation_id: number, device_name: string }) => {
+        try {
+            return new Promise((resolve, reject) => {
+                const query = `INSERT INTO sensor_device(substation_id, device_name) VALUES (?, ?)`;
+                db.run(query, [data.substation_id, data.device_name], function (err: Error) {
+                    if (err) {
+                        console.error("Error adding new sensor device:", err);
+                        reject(err);
+                    } else {
+                        resolve(this.lastID);  // 返回新插入设备的ID
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in add-sensor-device:", error);
+            throw error;
+        }
+    });
+
+    // 新建传感器设备数据
+    ipcMain.handle('add-data-item', async (event: IpcMainInvokeEvent, data: {
+        device_id: number,
+        vibration_data: number,
+        temperature_data: number,
+        vibration_threshold: number,
+        temperature_threshold: number,
+        is_alerted: boolean
+    }) => {
+        try {
+            return new Promise((resolve, reject) => {
+                const query = `
+                INSERT INTO data_item(
+                    device_id, vibration_data, temperature_data, vibration_threshold, 
+                    temperature_threshold, is_alerted
+                ) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            `;
+                db.run(query, [
+                    data.device_id, data.vibration_data, data.temperature_data,
+                    data.vibration_threshold, data.temperature_threshold, data.is_alerted
+                ], function (err: Error) {
+                    if (err) {
+                        console.error("Error adding data to data_item:", err);
+                        reject(err);
+                    } else {
+                        resolve(this.lastID);  // 返回新插入数据的ID
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in add-data-item:", error);
+            throw error;
+        }
+    });
+    // 获取所有分站的数据
+    ipcMain.handle('get-all-substations', async (event: IpcMainInvokeEvent) => {
+        try {
+            return new Promise((resolve, reject) => {
+                const query = 'SELECT * FROM substation';
+                db.all(query, [], (err, rows) => {
+                    if (err) {
+                        console.error("Error fetching all substations:", err);
+                        reject(err);
+                    } else {
+                        resolve(rows);  // 返回所有分站的数据
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in get-all-substations:", error);
+            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
+        }
+    });
+    // 根据分站ID获取与其关联的所有传感器设备
+    ipcMain.handle('get-all-sensors-by-substation', async (event: IpcMainInvokeEvent, substationId: number) => {
+        try {
+            return new Promise((resolve, reject) => {
+                const query = 'SELECT * FROM sensor_device WHERE substation_id = ?';
+                db.all(query, [substationId], (err, rows) => {
+                    if (err) {
+                        console.error("Error fetching sensors by substation:", err);
+                        reject(err);
+                    } else {
+                        resolve(rows);  // 返回与该分站相关的所有传感器设备
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in get-all-sensors-by-substation:", error);
+            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
+        }
+    });
+
+    // 根据分站ID和传感器设备ID获取所有未被隐藏相关数据项
+    ipcMain.handle('get-data-item-by-substation-and-device', async (event: IpcMainInvokeEvent, substationId: number, deviceId: number) => {
+        try {
+            return new Promise((resolve, reject) => {
+                // 检查传感器设备是否属于这个分站
+                const checkQuery = 'SELECT * FROM sensor_device WHERE substation_id = ? AND device_id = ?';
+                db.all(checkQuery, [substationId, deviceId], (checkErr, deviceRows) => {
+                    if (checkErr) {
+                        console.error("Error checking if the device belongs to the substation:", checkErr);
+                        reject(checkErr);
+                        return;
+                    }
+
+                    if (deviceRows.length === 0) {
+                        reject(new Error("The device doesn't belong to the provided substation or doesn't exist."));
+                        return;
+                    }
+
+                    // 如果传感器设备确实属于这个分站，获取所有未被隐藏的数据项
+                    const query = 'SELECT * FROM data_item WHERE device_id = ? AND is_hidden = 0 ORDER BY timestamp ASC';
+                    db.all(query, [deviceId], (err, rows) => {
+                        if (err) {
+                            console.error("Error fetching data items by device ID:", err);
+                            reject(err);
+                        } else {
+                            resolve(rows);
+                        }
+                    });
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in get-data-item-by-substation-and-device:", error);
             throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
         }
     });

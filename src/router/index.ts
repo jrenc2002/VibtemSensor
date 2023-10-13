@@ -4,7 +4,7 @@ import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router';
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/homeview',
+        redirect: '/checkview',
     },
     {
         path: '/homeview',
@@ -62,7 +62,14 @@ const routes: Array<RouteRecordRaw> = [
 
         ]
     },
-
+    {
+        path: '/checkview',
+        name: 'CheckView',
+        meta: {
+            title: '登录',
+        },
+        component: () => import(/* webpackChunkName: "login" */ '../views/CheckView.vue'),
+    },
 
 ];
 

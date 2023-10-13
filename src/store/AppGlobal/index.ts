@@ -9,11 +9,12 @@ const route = useRoute()
 const state = () => {
     return {
         // 分页选择项
-        pageChance: 1,
+        pageChance: 0,
 
         selectedDeviceIndex: -1,
         // 侧边展开
         isDrawerState: true,
+        limitDivceNum: 9,
     }
 }
 

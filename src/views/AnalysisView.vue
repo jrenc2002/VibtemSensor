@@ -5,7 +5,7 @@
                     v-show="PopupMangerState.isShowPop"
                     class="rounded-2xl absolute bg-white bg-opacity-50 h-[calc(100%-2rem)] w-[calc(100%-2rem)]  z-30 backdrop-blur-sm items-center justify-center flex"
             >
-                <ChartsView class="w-full h-full "></ChartsView>
+                <ChartsView :data="data" class="w-full h-full "></ChartsView>
             </div>
         </transition>
         <div class="rounded-2xl bg-white w-[100%] h-[100%]  bottom-0  shadow p-4 overflow-auto ">
@@ -13,20 +13,31 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 ">
                 <div v-for="machine in machines" :key="machine.id"
                      class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
-                     @click="popManager(machine.name)">
+                >
 
                     <div class="min-w-0 flex-1">
                         <a class="focus:outline-none flex-col">
-                            <h5 class="text-base font-semibold leading-6 text-gray-900">{{ machine.name }}</h5>
+                            <h5 class="text-xl font-semibold leading-6 text-gray-900">{{ machine.device_name }}</h5>
                             <div class=" sm:grid-cols-2 grid grid-cols-2 gap-4 ">
                                 <dl class="mt-5 grid grid-cols-1 gap-5 ">
-                                    <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+
+                                    <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-1 py-1
+                                    hover:bg-neutral-100 hover:cursor-pointer hover:border-indigo-500 hover:border-2 shadow " @click="popManager(machine.device_id,machine.substation_id,'zd')">
+                                        <img :src="chart"/>
+                                        <div class=" leading-4 mt-2 h-6 flex justify-center items-center w-full text-center">
+                                            振动
+                                        </div>
 
                                     </div>
                                 </dl>
-                                <dl class="mt-5 grid grid-cols-1 gap-5 ">
-                                    <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-4 py-5 shadow sm:p-6 ">
-
+                                <dl class="mt-5 grid grid-cols-1 gap-5 "
+                                    @click="popManager(machine.device_id,machine.substation_id,'wd')">
+                                    <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-1 py-1
+                                    hover:bg-neutral-100 hover:cursor-pointer hover:border-indigo-500 hover:border-2 shadow ">
+                                        <img :src="chart"/>
+                                        <div class=" leading-4 mt-2 h-6 flex justify-center items-center w-full text-center">
+                                            温度
+                                        </div>
 
                                     </div>
                                 </dl>
@@ -41,202 +52,105 @@
 </template>
 
 <script lang="ts" setup>
-import * as echarts from "echarts";
-import {computed, onMounted, onUnmounted, ref} from "vue";
+import {computed, onMounted, onUnmounted, ref, watch} from "vue";
 import {usePopupMangerState} from "@/store/PopupMangerState";
 import ChartsView from "@/components/ChartsView.vue";
+import {useAppGlobal} from "@/store/AppGlobal";
+import {useDeviceManage} from "@/store/DeviceManage";
+import chart from '@/assets/image/chart.png'
 
+const AppGlobal = useAppGlobal()
+const DeviceManage = useDeviceManage();
 const PopupMangerState = usePopupMangerState()
-const Temperaturechartid = ref<any>(null);
-const Vibrationchartid = ref<any>(null);
 /* ——————————————————————————声明echart—————————————————————————— */
-let Vibrationchart;
-let Temperaturechart;
-var option;
+
 
 onMounted(() => {
-  // chart =echarts.init(document.getElementById('comment-line'));
-  // Vibrationchart = echarts.init(Temperaturechartid.value);
-  // Temperaturechart = echarts.init(Vibrationchartid.value);
-  // initChart();
-    window.addEventListener('keydown', handleKeydown);
 
+    window.addEventListener('keydown', handleKeydown);
+    // 写个计时器
+    let timerId = setInterval(() => {
+        const sensorsData = DeviceManage.deviceList[AppGlobal.pageChance].sensorsData;
+
+        // 检查sensorsData是否不为空
+        if (sensorsData && sensorsData.length > 0) {
+
+            machinesRef.value = DeviceManage.deviceList[AppGlobal.pageChance].sensorsData;
+            // 清除计时器
+            clearInterval(timerId);
+        } else {
+            console.log("数据尚未读取");
+        }
+    }, 200);
 });
 onUnmounted(() => {
-    echarts.dispose;
     window.removeEventListener('keydown', handleKeydown);
 });
-const machinesref = ref([
-  {
-    id: 1,
-    name: '一号电机',
-    temperaturevalue: '23',
-    vibrationvalue: '43',
-  },
-  {
-    id: 2,
-    name: '二号电机',
-    temperaturevalue: '23',
-    vibrationvalue: '43',
-  }, {
-    id: 3,
-    name: '三号电机',
-    temperaturevalue: '23',
-    vibrationvalue: '43',
-  }, {
-    id: 4,
-    name: 'Jane Cooper',
-    temperaturevalue: '23',
-    vibrationvalue: '43',
-  }, {
-    id: 5,
-    name: 'Jane Cooper',
-    temperaturevalue: '23',
-    vibrationvalue: '43',
-  }, {
-    id: 6,
-    name: 'Jane Cooper',
-    temperaturevalue: '23',
-    vibrationvalue: '43',
-  }, {
-    id: 7,
-    name: 'Jane Cooper',
-    temperaturevalue: '23',
-    vibrationvalue: '43',
-  },
-])
-const machines = computed(() => machinesref.value)
+
+/* ——————————————————————————设备数据—————————————————————————— */
+
+const machinesRef = ref()
+const machines = computed(() => machinesRef.value)
+
+watch(() => AppGlobal.pageChance, () => {
+    console.log('11111111')
+    console.log(DeviceManage.deviceList[AppGlobal.pageChance])
+    console.log(DeviceManage.deviceList[AppGlobal.pageChance].sensorsData)
+    machinesRef.value = DeviceManage.deviceList[AppGlobal.pageChance].sensorsData
+})
+
+
+watch(() => DeviceManage.deviceList[AppGlobal.pageChance], (newData) => {
+
+    // 写个计时器
+    let timerId = setInterval(() => {
+        const sensorsData = DeviceManage.deviceList[AppGlobal.pageChance].sensorsData;
+
+        // 检查sensorsData是否不为空
+        if (sensorsData && sensorsData.length > 0) {
+
+            machinesRef.value = newData.sensorsData;
+            // 清除计时器
+            clearInterval(timerId);
+        } else {
+            console.log("数据尚未读取");
+        }
+    }, 200);
+
+
+})
 /* ——————————————————————————时间数据配置—————————————————————————— */
-// 时间单位
-let oneDay = 24 * 3600 * 1000;
-// 初始时间原点
-let base = +new Date(2023, 8, 11);
-// data数据
-let data = [[base, Math.random() * 300]];
-for (let i = 1; i < 20000; i++) {
-  let now = new Date((base += oneDay));
-  data.push([+now, Math.round((Math.random() - 0.5) * 20 + data[i - 1][1])]);
-}
+let data;
 
-
-/* ——————————————————————————echarts配置—————————————————————————— */
-function initChart() {
-
-  // 把配置和数据放这里
-  Vibrationchart.setOption({
-    tooltip: {
-      trigger: 'axis',
-      position: function (pt) {
-        return [pt[0], '10%'];
-      }
-    },
-
-    grid: {
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 0,
-      width: "100%",
-      hight: "100%",
-      borderWidth: 1,
-    },
-
-    xAxis: {
-      type: 'time',
-      boundaryGap: false //就是会不会只能在线上
-    },
-    yAxis: {
-      type: 'value',
-      boundaryGap: [0, '100%']
-    },
-    dataZoom: [
-      {
-        type: 'inside',
-        start: 70,
-        end: 100
-      },
-      {
-        start: 70,
-        end: 100
-      }
-    ],
-    series: [
-      {
-        name: 'Fake Data',
-        type: 'line',
-        smooth: false,//是否平衡显示
-        symbol: 'none',//是否显示点
-        // areaStyle: {},//是否显示面积
-        data: data
-      },
-
-    ]
-  });
-
-  // 把配置和数据放这里
-  Temperaturechart.setOption({
-    tooltip: {
-      trigger: 'axis',
-      position: function (pt) {
-        return [pt[0], '10%'];
-      }
-    },
-    grid: {
-      x: 0,
-      y: 0,
-      x2: 0,
-      y2: 0,
-      width: "100%",
-      hight: "100%",
-      borderWidth: 1,
-    },
-
-    xAxis: {
-      type: 'time',
-
-      boundaryGap: false //就是会不会只能在线上
-    },
-    yAxis: {
-      type: 'value',
-      boundaryGap: [0, '100%']
-    },
-    dataZoom: [
-      {
-        type: 'inside',
-        start: 70,
-        end: 100
-      },
-      {
-        start: 70,
-        end: 100
-      }
-    ],
-    series: [
-      {
-        name: 'Fake Data',
-        type: 'line',
-        smooth: false,//是否平衡显示
-        symbol: 'none',//是否显示点
-        // areaStyle: {},//是否显示面积
-        data: data
-      },
-
-    ]
-  });
-  window.onresize = function () {
-      //自适应大小
-      Vibrationchart.resize();
-      Temperaturechart.resize();
-  };
-}
 
 /* ——————————————————————————定时器时间函数配置—————————————————————————— */
-const popManager = (val: any) => {
-    if (val != '运行状态' && val != '运行时间' && val != '发酵批号') {
-        PopupMangerState.updateIsShowPop(true)
+const popManager = async (device_id: any, substation_id: any, kind: any) => {
+    await handleData(device_id, substation_id, kind)
 
-    }
 }
+const handleData = (device_id, substation_id, kind) => {
+    window.Electron.ipcRenderer.invoke('get-data-item-by-substation-and-device', substation_id, device_id).then(
+        (res) => {
+            // 这里将原始数据转换为需要的格式
+            if (kind === 'zd') {
+                data = res.map(item => {
+                    return [+new Date(item.timestamp), item.vibration_data];
+
+                });
+
+            } else if (kind === 'wd') {
+                data = res.map(item => {
+                    return [+new Date(item.timestamp), item.temperature_data];
+                });
+
+            }
+            console.log(data, '第一层');
+            PopupMangerState.updateIsShowPop(true)
+        }
+    );
+
+}
+
 const handleKeydown = (event) => {
     if (event.keyCode === 27) { // 27 是 esc 键的 keyCode
         console.log('ESC key was pressed!');

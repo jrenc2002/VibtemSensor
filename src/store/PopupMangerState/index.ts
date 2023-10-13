@@ -28,7 +28,7 @@ const state = () => {
         // 弹出内容为:
         popupContent: PopupType.None,
         // 是否打开弹窗
-        isShowPop: false
+        isShowPop: false,
 
 
     }
