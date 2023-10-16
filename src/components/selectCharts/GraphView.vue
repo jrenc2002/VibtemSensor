@@ -1,29 +1,22 @@
 <template>
-    <div :id="props.id" ref="rootRef" :style="{ width: '98%', height: '98%' }"></div>
+    <div ref="chartDiv" :style="{ width: '98%', height: '98%' }"></div>
 </template>
-<script lang="ts" name="checkReport" setup>
-import {defineProps, onMounted, onUnmounted, ref} from 'vue';
-// Echarts 为init（dom元素后的类型）
-// EChartsOption 为 option 的类型
+
+<script lang="ts" setup>
+import {defineProps, onMounted, onUnmounted, ref, watch} from 'vue';
 import {ECharts, EChartsOption, init} from 'echarts';
+import {usePopupMangerState} from "@/store/PopupMangerState";
 
-const props = defineProps<{
-    id: any,
-    data: any
-}>();
+const props = defineProps<{ id: string }>();
+const chartDiv = ref<HTMLElement | null>(null);
+let chartEch: ECharts | null = null;
+let data = ref();
+let alarmLimit = ref(0);
+let standardValue = ref(0);
+const PopupMangerState = usePopupMangerState()
 
-const rootRef = ref();
-let charEch: ECharts;
-
-const line = () => {
-    const charEle = document.getElementById(props.id) as HTMLElement;
-
-    // Check if the DOM element exists
-    if (!charEle) return;
-    charEch = init(charEle);
-    // Set an empty option to show a basic frame
-    charEch.showLoading();
-
+const updateChart = () => {
+    if (!chartDiv.value || !chartEch) return;
 
     const option: EChartsOption = {
         tooltip: {
@@ -39,15 +32,15 @@ const line = () => {
         },
         yAxis: {
             type: 'value',
-            min: -500,
-            max: 500,
+            min: 0,
+            max: 100,
             axisLabel: {
-                formatter: '{value} °C'
+                formatter: PopupMangerState.kind === '温度' ? '{value} °C' : '{value} mm/s'
             }
 
         },
         legend: {
-            data: ['Fake Data']
+            data: ['Data']
         },
         dataZoom: [
             {
@@ -83,48 +76,103 @@ const line = () => {
         },
         series: [
             {
-                name: 'Fake Data',
+                type: 'line',
+                smooth: true,
+                symbol: 'none',
+                markLine: {
+                    data: [{
+                        yAxis: alarmLimit.value,
+                        name: '报警上限',
+                        label: {
+                            formatter: '报警上限'
+                        },
+                        lineStyle: {
+                            color: 'red',
+                            type: 'dashed'
+                        }
+                    }]
+                }
+            },
+            {
+                type: 'line',
+                smooth: true,
+                symbol: 'none',
+                markLine: {
+                    data: [{
+                        yAxis: standardValue.value,
+                        name: '标准值',
+                        label: {
+                            formatter: '标准值'
+                        },
+                        lineStyle: {
+                            color: 'blue',
+                            type: 'solid'
+                        }
+                    }]
+                }
+            },
+            {
+                name: PopupMangerState.kind,
                 type: 'line',
                 smooth: true,//是否平衡显示
                 symbol: 'none',//是否显示点
                 // areaStyle: {},//是否显示面积
-                data: props.data
+                data: data.value
             }
         ]
     };
 
-    charEch.setOption(option);
-    charEch.hideLoading();
-
-    // 监听窗口变化 - 只刷新最后一个图表
-    window.onresize = () => {
-        charEch.resize();
-    };
-
-    // 监听窗口变化 - 多个图表同时刷新
-    window.addEventListener('resize', () => {
-        charEch.resize();
-    });
-};
-const handleResize = () => {
-    if (charEch) {
-        charEch.resize();
-    }
+    chartEch.setOption(option);
+    chartEch.resize();
 };
 
-/* ——————————————————————————生命周期配置—————————————————————————— */
-onMounted(() => {
-    // 这里是由于图表渲染快于父元素导致图表比例溢出，做的一个延缓操作
+
+watch(() => PopupMangerState.setData.alarmLimit, (newData) => {
+    alarmLimit.value = newData
+    updateChart();
+})
+watch(() => PopupMangerState.setData.Standard, (newData) => {
+    standardValue.value = newData
+    updateChart();
+})
+
+watch(() => PopupMangerState.selectTabs, (newData) => {
     setTimeout(() => {
-        line();
-    }, 1500);
-    console.log(props.data)
-    window.addEventListener('resize', handleResize);
+        updateChart();
+    }, 500);
+
+})
+watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
+    if (oldValue === false && newData === true) {
+        data.value = PopupMangerState.GraphData
+
+        setTimeout(() => {
+            updateChart();
+        }, 500);
+    }
+
+})
+onMounted(() => {
+    if (chartDiv.value) {
+        chartEch = init(chartDiv.value);
+        window.addEventListener('resize', () => {
+            if (chartEch) {
+                chartEch.resize();
+            }
+        });
+
+        updateChart();
+    }
 });
+
 onUnmounted(() => {
-    window.removeEventListener('resize', handleResize);
+    if (chartEch) {
+        chartEch.dispose();
+        chartEch = null;
+    }
+    window.removeEventListener('resize', updateChart);
 });
-/* ——————————————————————————时间数据配置—————————————————————————— */
 
 </script>
+
 <style lang="scss" scoped></style>

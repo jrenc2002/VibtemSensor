@@ -27,8 +27,37 @@ const state = () => {
     return {
         // 弹出内容为:
         popupContent: PopupType.None,
+        kind: '',
+        setData: {
+            calibration: 0,
+            alarmLimit: 0,
+            Standard: 0,
+        },
         // 是否打开弹窗
         isShowPop: false,
+        WaterFallData: {
+            placeholderData: null,
+            actualData: null,
+            categories: null,
+
+        }, //瀑布图
+        BauLuData: {
+            frequencies: null,
+            amplitudes: null,
+            phases: null
+
+        }, //包络图
+        CepstrumData: {
+            timeLags: null,
+            autocorrelation: null
+        }, //倒谱图
+        FrequencyData: {    //频谱图
+            frequencies: null,
+            amplitudes: null,
+        },
+        GraphData: null,//趋势图
+        TimeWaveData: null,//时域波形
+        selectTabs: 0,
 
 
     }
@@ -51,7 +80,11 @@ export const usePopupMangerState = defineStore('popupManger', {
                 console.log('[调试] 当前弹窗为：', newisShowPop);
             }
             this.isShowPop = newisShowPop;
-        }
+        },
+        // updatePopData(newPopData: any) {
+        //
+        //
+        // }
 
     },
 });

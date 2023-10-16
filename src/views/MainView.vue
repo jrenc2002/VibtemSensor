@@ -24,7 +24,6 @@
                     <span class="countdown mt-1 text-3xl font-semibold tracking-tight text-gray-900">
                      {{ machine.current_data?.vibration_data }}
                     </span>
-
                   </div>
                 </dl>
               </div>

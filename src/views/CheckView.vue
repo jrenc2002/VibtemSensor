@@ -359,7 +359,7 @@ function uint8ArrayToBase64(buffer) {
 async function CheckKey(randomData) {
     const key = await deriveKeyFromPassword(Privatekey);
     const encrypted = await encryptWithKey(randomData, key);
-
+    console.log(encrypted.data)
     return param.password === encrypted.data;
 }
 

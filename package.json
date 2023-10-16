@@ -25,6 +25,7 @@
     "daisyui": "^3.3.1",
     "echarts": "^5.4.3",
     "element-plus": "^2.3.8",
+    "fft-js": "^0.0.12",
     "heroicons": "^2.0.18",
     "install": "^0.13.0",
     "modbus-serial": "^8.0.13",
