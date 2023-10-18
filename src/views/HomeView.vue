@@ -50,9 +50,8 @@ import {onMounted, onUnmounted, reactive} from 'vue';
 import NavigationView from '../components/NavigationView.vue';
 import {useDeviceManage} from '@/store/DeviceManage'
 import {useAppGlobal} from '@/store/AppGlobal'
-import {usePopupMangerState} from "@/store/PopupMangerState";
+import {updateSubstationData} from '@/api'
 
-const PopupMangerState = usePopupMangerState()
 const AppGlobal = useAppGlobal();
 const DeviceManage = useDeviceManage();
 // 使用 Vue3 的 reactive 函数来创建一个响应式对象，用于控制抽屉的显示状态
@@ -96,50 +95,80 @@ onMounted(() => {
         }
     );
     InitSensorsData();
-
-
+    getAllData();
+    
 });
-// 初始化数据，初始化传感器数据
-const InitSensorsData = async () => {
-    await window.Electron.ipcRenderer.invoke('get-all-substations').then(
-        (res) => {
-            DeviceManage.updateDeviceList(res);
-        }
-    );
-
-    DeviceManage.deviceList.forEach((item) => {
-        if (item && item.substation_id) {
-            let substationId = item.substation_id;
-            window.Electron.ipcRenderer.invoke('get-all-sensors-by-substation', substationId)
-                .then((res) => {
-                    // 处理数据
-                    const sensorsData = res.map(sensor => ({
-                        device_id: sensor.device_id,
-                        device_name: sensor.device_name,
-                        substation_id: sensor.substation_id,
-                        current_data: {
-                            vibration_data: 0,
-                            temperature_data: 0,
-                            vibration_threshold: 999,
-                            temperature_threshold: 999,
-                        }
-                    }));
-                    item.sensorsData = sensorsData; // assign the new data directly
-                })
-                .catch(err => {
-                    console.error("Error during IPC call:", err);
-                });
-        } else {
-            console.warn("Invalid pageChance or missing substation_id.");
-        }
-    })
+const getAllData = () => {
+// 设置定时器，例如每10秒钟读取一次所有分站数据
+    const UPDATE_INTERVAL = 1000; // 1秒
+    
+    setInterval(() => {
+        // 使用Promise.all确保所有分站数据同时异步更新
+        const updatePromises = DeviceManage.deviceList.map(async (substation) => {
+            try {
+                await updateSubstationData(substation);
+            } catch (error) {
+                console.error(`更新分站${substation.id}数据时发生错误:`, error);
+            }
+        });
+        
+        // 当所有分站数据更新完成后
+        Promise.all(updatePromises).then(() => {
+            // console.log("所有分站数据已更新");
+        }).catch((error) => {
+            console.error("更新某些分站数据时发生错误:", error);
+        });
+        
+    }, UPDATE_INTERVAL);
+    
 }
+// 初始化数据，从数据库获取传感器表
+const InitSensorsData = async () => {
+    try {
+        const allSubstations = await window.Electron.ipcRenderer.invoke('get-all-substations');
+        console.log(allSubstations);
+        DeviceManage.updateDeviceList(allSubstations);
+        
+        for (const item of DeviceManage.deviceList) {
+            if (item && item.substation_id) {
+                const substationId = item.substation_id;
+                try {
+                    const sensors = await window.Electron.ipcRenderer.invoke('get-all-sensors-by-substation', substationId);
+                    
+                    const organizedSensorsData = [];
+                    for (let i = 0; i < 6; i++) {
+                        const controlBoardSensors = sensors.slice(i * 5, (i + 1) * 5).map(sensor => ({
+                            device_id: sensor.device_id,
+                            device_name: sensor.device_name,
+                            current_data: {
+                                vibration_data: 0,
+                                temperature_data: 0,
+                                vibration_threshold: 999,
+                                temperature_threshold: 999,
+                            }
+                        }));
+                        organizedSensorsData.push(controlBoardSensors);
+                    }
+                    item.sensorsData = organizedSensorsData;
+                    
+                } catch (err) {
+                    console.error("Error during IPC call for sensors:", err);
+                }
+            } else {
+                console.warn("Invalid substation or missing substation_id.");
+            }
+        }
+    } catch (err) {
+        console.error("Error during IPC call for substations:", err);
+    }
+}
+
 
 // 使用 Vue3 的生命周期钩子函数 onUnmounted，在组件卸载之前移除窗口大小变化的监听事件
 onUnmounted(() => {
     window.removeEventListener('resize', updateWindowSize);
-
-
+    
+    
 });
 
 

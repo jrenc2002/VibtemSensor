@@ -40,7 +40,7 @@ const updateChart = () => {
 
         },
         legend: {
-            data: ['Data']
+            data: [PopupMangerState.kind]
         },
         dataZoom: [
             {
@@ -153,16 +153,18 @@ watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
 
 })
 onMounted(() => {
-    if (chartDiv.value) {
-        chartEch = init(chartDiv.value);
-        window.addEventListener('resize', () => {
-            if (chartEch) {
-                chartEch.resize();
-            }
-        });
-
-        updateChart();
-    }
+    setTimeout(() => {
+        if (chartDiv.value) {
+            chartEch = init(chartDiv.value);
+            window.addEventListener('resize', () => {
+                if (chartEch) {
+                    chartEch.resize();
+                }
+            });
+            
+            updateChart();
+        }
+    }, 500); // 延迟 500 毫秒
 });
 
 onUnmounted(() => {

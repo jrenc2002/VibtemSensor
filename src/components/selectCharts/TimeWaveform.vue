@@ -1,5 +1,5 @@
 <template>
-    <div ref="chartDiv" :style="{ width: '98%', height: '98%' }"></div>
+	<div ref="chartDiv" :style="{ width: '98%', height: '98%' }"></div>
 </template>
 
 <script lang="ts" setup>
@@ -17,7 +17,7 @@ const PopupMangerState = usePopupMangerState()
 
 const updateChart = () => {
     if (!chartDiv.value || !chartEch) return;
-
+    
     const option: EChartsOption = {
         tooltip: {
             trigger: 'axis',
@@ -25,7 +25,7 @@ const updateChart = () => {
                 return [pt[0], '10%'];
             }
         },
-
+        
         xAxis: {
             type: 'time',
             boundaryGap: false
@@ -37,10 +37,10 @@ const updateChart = () => {
             axisLabel: {
                 formatter: PopupMangerState.kind === '温度' ? '{value} °C' : '{value} mm/s'
             }
-
+            
         },
         legend: {
-            data: ['Data']
+            data: [PopupMangerState.kind]
         },
         dataZoom: [
             {
@@ -121,7 +121,7 @@ const updateChart = () => {
             }
         ]
     };
-
+    
     chartEch.setOption(option);
     chartEch.resize();
 };
@@ -140,17 +140,17 @@ watch(() => PopupMangerState.selectTabs, (newData) => {
     setTimeout(() => {
         updateChart();
     }, 500);
-
+    
 })
 watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
     if (oldValue === false && newData === true) {
         data.value = PopupMangerState.TimeWaveData
-
+        
         setTimeout(() => {
             updateChart();
         }, 500);
     }
-
+    
 })
 onMounted(() => {
     if (chartDiv.value) {
@@ -160,7 +160,7 @@ onMounted(() => {
                 chartEch.resize();
             }
         });
-
+        
         updateChart();
     }
 });

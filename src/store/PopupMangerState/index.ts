@@ -81,10 +81,6 @@ export const usePopupMangerState = defineStore('popupManger', {
             }
             this.isShowPop = newisShowPop;
         },
-        // updatePopData(newPopData: any) {
-        //
-        //
-        // }
 
     },
 });

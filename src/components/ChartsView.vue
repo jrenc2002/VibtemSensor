@@ -105,13 +105,11 @@ import CepstrumView from "@/components/selectCharts/CepstrumView.vue";
 import FrequencyDomain from "@/components/selectCharts/FrequencyDomain.vue";
 import TimeWaveform from "@/components/selectCharts/TimeWaveform.vue";
 import WaterFall from "@/components/selectCharts/WaterFall.vue";
-import {defineProps, onMounted, reactive, ref} from "vue";
+import {reactive, ref} from "vue";
 import {usePopupMangerState} from "@/store/PopupMangerState";
 
 const PopupMangerState = usePopupMangerState()
-const props = defineProps<{
-    data: any
-}>();
+
 
 const SetData = reactive(
     {
@@ -145,7 +143,7 @@ const updateSelectTabs = (id: any) => {
     PopupMangerState.selectTabs = id
 }
 
-let data = ref(props.data);
+
 const EnterSave = (id) => {
     if (id == 1) {
         PopupMangerState.setData.calibration = SetData.calibrationCoefficient
@@ -157,10 +155,6 @@ const EnterSave = (id) => {
 
 }
 
-onMounted(() => {
-    // todo 初始化报警上限数据
 
-    console.log(data, '第二层');
-})
 </script>
 <style lang="scss" scoped></style>

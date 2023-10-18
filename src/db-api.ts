@@ -30,7 +30,7 @@ export function createInitDB(): any {
             `);
             await runQuery(`
                 CREATE TABLE IF NOT EXISTS sensor_device (
-                    device_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- 主键，自动递增的传感器设备ID
+                    device_id INTEGER PRIMARY KEY AUTOINCREMENT,  -- 主键，自动递增的传感器设备ID,从1开始递增
                     substation_id INTEGER NOT NULL,               -- 所属的分站ID，与分站表关联
                     device_name TEXT NOT NULL,                    -- 传感器设备的名称
                     FOREIGN KEY (substation_id) REFERENCES substation(substation_id)  -- 外键关联到分站表的ID

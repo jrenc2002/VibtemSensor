@@ -38,25 +38,27 @@
                                         @dblclick.stop="changePageName(team.id)"
                                         @contextmenu.prevent="showMenu($event, team.id)"
                                 >
-                <span
-                        :class="[team.current ? 'text-[#1EA5FC] border-[#1EA5FC]' : 'text-gray-400 border-gray-200 group-hover:border-[#1EA5FC] group-hover:text-[#1EA5FC]', 'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white']">{{
-                        team.id
-                    }}
+                                    <!-- 指示灯 -->
+    
+                                    <span
+                                            :class="[team.current ? 'text-[#1EA5FC] border-[#1EA5FC]' : 'text-gray-400 border-gray-200 group-hover:border-[#1EA5FC] group-hover:text-[#1EA5FC]',
+                                            (DeviceManage.deviceList[team.id].editSocket===null)?'bg-gray-200 ':'',
+                                            (DeviceManage.deviceList[team.id].editSocket!==null&&DeviceManage.deviceList[team.id].alarm===true)?'bg-red-400':'',
+                                            (DeviceManage.deviceList[team.id].editSocket!==null&&DeviceManage.deviceList[team.id].alarm!==true)?'bg-white':''
+                                             ,'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium ']"
+                                    >
+                                      {{ team.id }}
                 </span>
-
+    
                                     <span v-if="team.id !== editID" class="truncate">{{ team.name }}</span>
                                     <span v-else>
-                <input v-model="updateName"
-                       :placeholder="team.name"
-                       class="broder border-gray-200 text-black w-full"
-                       @keyup.enter="enterEdit(team.id)"
-
-                >
-
-              </span>
+										<input v-model="updateName" :placeholder="team.name"
+                                               class="border border-gray-200 text-black w-full"
+                                               @keyup.enter="enterEdit(team.id)"></span>
                                 </div>
-
-                                <transition name="faderight">
+    
+    
+                                <transition name="fadeRight">
                                     <DeviceContextMenu v-if="AppGlobal.selectedDeviceIndex== team.id" :index="team.id"/>
                                 </transition>
                             </li>
@@ -71,7 +73,7 @@
         <div>
             <Transition name="fade">
                 <div v-if="isExpanded" class="
-              w-[12rem] h-[15rem] border-[2px] border-[#1EA5FC] rounded-[14px] fixed bottom-4  bg-white left-6">
+              w-[12rem] h-[16rem] border-[2px] border-[#1EA5FC] rounded-[14px] fixed bottom-4  bg-white left-6">
                     <div class="absolute right-0 p-2 cursor-pointer" @click="toggle">
                         <svg fill="none" height="18" viewBox="0 0 15 15" width="18" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 4.7L11.3 4L8 7.3L4.7 4L4 4.7L7.3 8L4 11.3L4.7 12L8 8.7L11.3 12L12 11.3L8.7 8L12 4.7Z"
@@ -174,6 +176,7 @@ import {useAppGlobal} from '@/store/AppGlobal'
 // import {addDevice} from "@/api";
 import {useDeviceManage} from '@/store/DeviceManage'
 import DeviceContextMenu from "@/components/DeviceContextMenu";
+import {addDevice} from "@/api";
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const AppGlobal = useAppGlobal()
 const ChancePage = ref(AppGlobal.pageChance)
@@ -257,7 +260,7 @@ const toggle = () => {
 const newDevice = () => {
     if (isValidDevice(ipAddress.value, port.value)) {
         message.value = '已添加设备！';
-        // addDevice(ipAddress.value, port.value, nameDevice.value)
+        addDevice(ipAddress.value, port.value, nameDevice.value)
         // You can also send the IP to a server or any other logic here
     } else {
 
@@ -293,13 +296,13 @@ const enterEdit = (id) => {
 }
 
 /* 初始状态 */
-.faderight-enter-from {
+.fadeRight-enter-from {
     transform-origin: center center;
     transform: scale(0.5);
     opacity: 0;
 }
 
-.faderight-enter, .faderight-leave-to /* .faderight-leave-active in <2.1.8 */
+.fadeRight-enter, .fadeRight-leave-to /* .fadeRight-leave-active in <2.1.8 */
 {
     opacity: 0;
     transform-origin: center center;
@@ -308,13 +311,13 @@ const enterEdit = (id) => {
 }
 
 /* 过渡状态 */
-.faderight-enter-active, .faderight-leave-active {
+.fadeRight-enter-active, .fadeRight-leave-active {
     transition: opacity 0.5s, transform 0.2s;
 
 }
 
 /* 结束状态 */
-.faderight-enter-to /* .faderight-enter-active in <2.1.8 */, .faderight-leave {
+.fadeRight-enter-to /* .fadeRight-enter-active in <2.1.8 */, .fadeRight-leave {
     opacity: 1;
 
 

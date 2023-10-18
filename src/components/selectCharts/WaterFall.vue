@@ -68,7 +68,7 @@ const updateChart = () => {
             }
         },
         legend: {
-            data: ['Data']
+            data: ['Data', 'Placeholder']
         },
         series: [
             {
