@@ -198,7 +198,51 @@ export function createInitDB(): any {
             throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
         }
     });
-
+    
+    // 根据分站ID和传感器设备ID获取所有未被隐藏且处于报警状态的数据项
+    ipcMain.handle('get-alerted-data-item-by-substation-and-device', async (event: IpcMainInvokeEvent, substationId: number, deviceId: number) => {
+        try {
+            return new Promise((resolve, reject) => {
+                // 检查传感器设备是否属于这个分站
+                const checkQuery = 'SELECT * FROM sensor_device WHERE substation_id = ? AND device_id = ?';
+                db.all(checkQuery, [substationId, deviceId], (checkErr, deviceRows) => {
+                    if (checkErr) {
+                        console.error("Error checking if the device belongs to the substation:", checkErr);
+                        reject(checkErr);
+                        return;
+                    }
+                    
+                    if (deviceRows.length === 0) {
+                        reject(new Error("The device doesn't belong to the provided substation or doesn't exist."));
+                        return;
+                    }
+                    
+                    // 如果传感器设备确实属于这个分站，获取所有未被隐藏且处于报警状态的数据项
+                    const query = `
+                    SELECT * FROM data_item
+                    WHERE device_id = ?
+                    AND is_hidden = 0
+                    AND (is_alerted = 1
+                        OR vibration_data > vibration_threshold
+                        OR temperature_data > temperature_threshold)
+                    ORDER BY timestamp ASC
+                `;
+                    db.all(query, [deviceId], (err, rows) => {
+                        if (err) {
+                            console.error("Error fetching alerted data items by device ID:", err);
+                            reject(err);
+                        } else {
+                            resolve(rows);
+                        }
+                    });
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in get-alerted-data-item-by-substation-and-device:", error);
+            throw error;
+        }
+    });
+    
     // 根据分站ID和传感器设备ID获取所有未被隐藏相关数据项
     ipcMain.handle('get-data-item-by-substation-and-device', async (event: IpcMainInvokeEvent, substationId: number, deviceId: number) => {
         try {

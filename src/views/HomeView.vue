@@ -50,7 +50,7 @@ import {onMounted, onUnmounted, reactive} from 'vue';
 import NavigationView from '../components/NavigationView.vue';
 import {useDeviceManage} from '@/store/DeviceManage'
 import {useAppGlobal} from '@/store/AppGlobal'
-import {updateSubstationData} from '@/api'
+import {openDevice, updateSubstationData} from '@/api'
 
 const AppGlobal = useAppGlobal();
 const DeviceManage = useDeviceManage();
@@ -95,9 +95,34 @@ onMounted(() => {
         }
     );
     InitSensorsData();
+    initDeviceManage();
     getAllData();
     
 });
+const initDeviceManage = () => {
+    if (!Array.isArray(DeviceManage.deviceList)) {
+        console.error("DeviceManage.deviceList不存在或不是数组");
+        return;
+    }
+    
+    try {
+        DeviceManage.deviceList.forEach((item, index) => {
+            try {
+                openDevice(index)
+            } catch (error) {
+                
+                console.error("设备${index}中没打开");
+                
+            }
+        });
+        
+        
+    } catch (error) {
+        console.error("初始化设备中发生错误：", error);
+    }
+    
+};
+
 const getAllData = () => {
 // 设置定时器，例如每10秒钟读取一次所有分站数据
     const UPDATE_INTERVAL = 1000; // 1秒
@@ -106,7 +131,11 @@ const getAllData = () => {
         // 使用Promise.all确保所有分站数据同时异步更新
         const updatePromises = DeviceManage.deviceList.map(async (substation) => {
             try {
-                await updateSubstationData(substation);
+                if (substation.editSocket !== null) {
+                    console.log(DeviceManage.deviceList)
+                    await updateSubstationData(substation.id);
+                }
+                
             } catch (error) {
                 console.error(`更新分站${substation.id}数据时发生错误:`, error);
             }

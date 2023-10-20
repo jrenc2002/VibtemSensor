@@ -35,7 +35,7 @@ const updateChart = () => {
         yAxis: {
             type: 'value',
             min: 0,
-            max: 20,
+            max: 100,
         },
         legend: {
             data: [PopupMangerState.kind]

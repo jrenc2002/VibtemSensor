@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld('useModbusAPI', {
             connect: modbusInstance.connect.bind(modbusInstance, ip, port, id),
             writeRegisters: modbusInstance.writeRegisters.bind(modbusInstance),
             readHoldingRegisters: modbusInstance.readHoldingRegisters.bind(modbusInstance),
-            updateRegister: modbusInstance.updateRegister.bind(modbusInstance),
+            updateRegister: modbusInstance.updateRegisterByDataIndex.bind(modbusInstance),
             close: modbusInstance.close.bind(modbusInstance),
             on: modbusInstance.on.bind(modbusInstance)
         };
@@ -32,17 +32,21 @@ class ModbusInstance {
         return new Promise((resolve, reject) => {
             this.client.connectTCP(ip, {port: port}, err => {
                 if (err) {
-                    console.log(err, '-----------')
+                    console.log(err, '-----------');
                     reject(err);
                 } else {
-                    console.log("连接成功")
+    
                     this.client.setID(id);
+                    if (this.client.emit) {
+                        this.client.emit('connect');  // 直接触发 connect 事件
+                    }
                     resolve();
                 }
             });
         });
     }
-
+    
+    
     on(event, callback) {
         this.client.on(event, callback);
     }

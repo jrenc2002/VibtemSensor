@@ -11,8 +11,8 @@
             </div>
             <div class=" w-[100%] h-[88%] overflow-y-auto pl-4 pl-5 pr-5 overflow-auto ">
                 
-                <div class=" w-[100%]  h-[100%]  bottom-0 grid grid-cols-1 gap-4 sm:grid-cols-4 sm:grid-rows-6 overflow-auto">
-                    
+                <div class=" w-[100%]  h-[100%]  bottom-0 grid grid-cols-1 gap-4 sm:grid-cols-4 overflow-auto">
+    
                     <button v-for="machine in machines" :key="machine.id"
                             :class="machine.select?'border-[#F7BF46]':'border-gray-300'" class="relative flex items-center  rounded-lg border
                     bg-white shadow-sm h-20  hover:border-[#F7BF46]" @click="machine.select=!machine.select">
@@ -20,8 +20,8 @@
                             <h5 class="text-xl font-none leading-6 text-gray-900 px-3">{{ machine.name }}</h5>
                         </div>
                     </button>
-                
-                
+
+
                 </div>
             </div>
         </div>

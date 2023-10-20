@@ -197,6 +197,7 @@ onMounted(() => {
 
     basePages.value = DeviceManage.deviceList
     initPagesValue()
+
 })
 const initPagesValue = () => {
     pagesValue.value = basePages.value.map((page) => ({
@@ -208,7 +209,7 @@ const navigation = computed(() => [
     {name: '显示界面', href: '/mainview', icon: TvIcon, current: route.path === '/mainview'},
     {name: '分析界面', href: '/analysisview', icon: ChartBarIcon, current: route.path === '/analysisview'},
     {name: '设置界面', href: '/setiew', icon: Cog8ToothIcon, current: route.path === '/setiew'},
-    {name: '报警数据', href: '/alarmview', icon: ServerStackIcon, count: '20+', current: route.path === '/alarmview'},
+    {name: '报警数据', href: '/alarmview', icon: ServerStackIcon, current: route.path === '/alarmview'},
     {name: '测试页面', href: '/testview', icon: BugAntIcon, current: route.path === '/testview'}
 
 ])
@@ -250,8 +251,7 @@ const isValidDevice = (Ip, Port) => {
     const isSameIpDevica = !DeviceManage.deviceList.some(device => device.ip === Ip && device.port === Port);
 
     const ipPatternIp = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-    const ipPatternPort = /^(102[4-9]|10[3-9][0-9]|1[1-9][0-9]{2}|[2-9][0-9]{3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
-    return ipPatternIp.test(Ip) && ipPatternPort.test(Port) && isSameIpDevica;
+    return ipPatternIp.test(Ip) && isSameIpDevica;
 };
 const toggle = () => {
     isExpanded.value = !isExpanded.value;
