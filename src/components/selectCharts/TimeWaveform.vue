@@ -17,6 +17,7 @@ const PopupMangerState = usePopupMangerState()
 
 const updateChart = () => {
     if (!chartDiv.value || !chartEch) return;
+    data.value = PopupMangerState.TimeWaveData
     
     const option: EChartsOption = {
         tooltip: {
@@ -144,8 +145,7 @@ watch(() => PopupMangerState.selectTabs, (newData) => {
 })
 watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
     if (oldValue === false && newData === true) {
-        data.value = PopupMangerState.TimeWaveData
-        
+    
         setTimeout(() => {
             updateChart();
         }, 500);

@@ -19,7 +19,11 @@ const PopupMangerState = usePopupMangerState()
 
 const updateChart = () => {
     if (!chartDiv.value || !chartEch) return;
-
+    frequencies.value = PopupMangerState.BauLuData.frequencies
+    if (Array.isArray(PopupMangerState.BauLuData.amplitudes) && Array.isArray(PopupMangerState.BauLuData.phases)) {
+        amplitudes.value = (PopupMangerState.BauLuData.amplitudes as number[]).map(amplitude => 20 * Math.log10(amplitude))
+        phases.value = (PopupMangerState.BauLuData.phases as number[]).map(phase => phase * (180 / Math.PI))
+    }
     const option: EChartsOption = {
         tooltip: {
             trigger: 'axis',
@@ -120,14 +124,8 @@ watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
             console.error("Amplitudes or phases are not defined!");
             return;
         }
-
-        frequencies.value = PopupMangerState.BauLuData.frequencies
-        if (Array.isArray(PopupMangerState.BauLuData.amplitudes) && Array.isArray(PopupMangerState.BauLuData.phases)) {
-            amplitudes.value = (PopupMangerState.BauLuData.amplitudes as number[]).map(amplitude => 20 * Math.log10(amplitude))
-            phases.value = (PopupMangerState.BauLuData.phases as number[]).map(phase => phase * (180 / Math.PI))
-        }
-
-
+    
+    
         setTimeout(() => {
             updateChart();
         }, 500);

@@ -18,7 +18,9 @@ const PopupMangerState = usePopupMangerState()
 
 const updateChart = () => {
     if (!chartDiv.value || !chartEch) return;
-
+    dataY.value = PopupMangerState.FrequencyData.amplitudes
+    dataX.value = PopupMangerState.FrequencyData.frequencies
+    
     const option: EChartsOption = {
         tooltip: {
             trigger: 'axis',
@@ -138,8 +140,6 @@ watch(() => PopupMangerState.selectTabs, (newData) => {
 })
 watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
     if (oldValue === false && newData === true) {
-        dataY.value = PopupMangerState.FrequencyData.amplitudes
-        dataX.value = PopupMangerState.FrequencyData.frequencies
 
         setTimeout(() => {
             updateChart();

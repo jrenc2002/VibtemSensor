@@ -24,23 +24,23 @@
                                         
                                         <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-1 py-1
                                     hover:bg-neutral-100 hover:cursor-pointer hover:border-indigo-500 hover:border-2 shadow "
-                                             @click="popManager(machine.device_id,machine.substation_id,'振动')">
+                                             @click="popManager(machine.device_id,DeviceManage.deviceList[AppGlobal.pageChance].substation_id,'振动')">
                                             <img :src="chart"/>
                                             <div class=" leading-4 mt-2 h-6 flex justify-center items-center w-full text-center">
                                                 振动
                                             </div>
-                                        
+
                                         </div>
                                     </dl>
                                     <dl class="mt-5 grid grid-cols-1 gap-5 "
-                                        @click="popManager(machine.device_id,machine.substation_id,'温度')">
+                                        @click="popManager(machine.device_id,DeviceManage.deviceList[AppGlobal.pageChance].substation_id,'温度')">
                                         <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-1 py-1
                                     hover:bg-neutral-100 hover:cursor-pointer hover:border-indigo-500 hover:border-2 shadow ">
                                             <img :src="chart"/>
                                             <div class=" leading-4 mt-2 h-6 flex justify-center items-center w-full text-center">
                                                 温度
                                             </div>
-                                        
+        
                                         </div>
                                     </dl>
                                 </div>
@@ -156,13 +156,15 @@ let data;
 
 /* ——————————————————————————定时器时间函数配置—————————————————————————— */
 const popManager = async (device_id, substation_id, kind) => {
+    console.log(device_id, substation_id)
     await handleData(device_id, substation_id, kind)
     
 }
-const handleData = (device_id, substation_id, kind) => {
-    window.Electron.ipcRenderer.invoke('get-data-item-by-substation-and-device', substation_id, device_id)
+const handleData = async (device_id, substation_id, kind) => {
+    await window.Electron.ipcRenderer.invoke('get-data-item-by-substation-and-device', substation_id, device_id)
         .then((res) => {
             try {
+                
                 // 先确保res是有效的数组
                 if (!Array.isArray(res)) {
                     throw new Error("Received data is not an array");
@@ -178,19 +180,7 @@ const handleData = (device_id, substation_id, kind) => {
                     throw new Error(`Unknown kind: ${kind}`);
                 }
                 
-                // 这里将原始数据转换为需要的格式
-                if (kind === '振动') {
-                    data = res.map(item => {
-                        return [+new Date(item.timestamp), item.vibration_data];
-                        
-                    });
-                    
-                } else if (kind === '温度') {
-                    data = res.map(item => {
-                        return [+new Date(item.timestamp), item.temperature_data];
-                    });
-                    
-                }
+                
                 PopupMangerState.kind = kind
                 data.sort((a, b) => a[0] - b[0]);
                 PopupMangerState.GraphData = data
@@ -296,7 +286,7 @@ const handleData = (device_id, substation_id, kind) => {
         .catch(error => {
             console.log("Error fetching data:", error, '没找到数据');
         });
-    PopupMangerState.updateIsShowPop(true)
+    
 }
 
 

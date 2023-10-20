@@ -216,7 +216,7 @@ export function createInitDB(): any {
                         reject(new Error("The device doesn't belong to the provided substation or doesn't exist."));
                         return;
                     }
-
+                    console.log("Device rows:", deviceRows)
                     // 如果传感器设备确实属于这个分站，获取所有未被隐藏的数据项
                     const query = 'SELECT * FROM data_item WHERE device_id = ? AND is_hidden = 0 ORDER BY timestamp ASC';
                     db.all(query, [deviceId], (err, rows) => {
@@ -225,6 +225,7 @@ export function createInitDB(): any {
                             reject(err);
                         } else {
                             resolve(rows);
+                            console.log("Device rows:", rows)
                         }
                     });
                 });

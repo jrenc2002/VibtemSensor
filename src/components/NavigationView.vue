@@ -173,7 +173,6 @@ import {useRoute} from 'vue-router'
 import {computed, onMounted, ref, watch} from 'vue'
 import {BugAntIcon, ChartBarIcon, Cog8ToothIcon, ServerStackIcon, TvIcon} from '@heroicons/vue/24/outline'
 import {useAppGlobal} from '@/store/AppGlobal'
-// import {addDevice} from "@/api";
 import {useDeviceManage} from '@/store/DeviceManage'
 import DeviceContextMenu from "@/components/DeviceContextMenu";
 import {addDevice} from "@/api";

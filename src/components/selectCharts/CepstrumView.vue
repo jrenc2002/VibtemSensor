@@ -18,7 +18,9 @@ const PopupMangerState = usePopupMangerState()
 
 const updateChart = () => {
     if (!chartDiv.value || !chartEch) return;
-
+    dataY.value = PopupMangerState.CepstrumData.autocorrelation
+    dataX.value = PopupMangerState.CepstrumData.timeLags
+    
     const option: EChartsOption = {
         tooltip: {
             trigger: 'axis',
@@ -138,8 +140,6 @@ watch(() => PopupMangerState.selectTabs, (newData) => {
 })
 watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
     if (oldValue === false && newData === true) {
-        dataY.value = PopupMangerState.CepstrumData.autocorrelation
-        dataX.value = PopupMangerState.CepstrumData.timeLags
 
         setTimeout(() => {
             updateChart();

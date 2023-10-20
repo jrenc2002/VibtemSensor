@@ -19,10 +19,12 @@ const PopupMangerState = usePopupMangerState()
 
 const updateChart = () => {
     if (!chartDiv.value || !chartEch) return;
-
+    actualData.value = PopupMangerState.WaterFallData.actualData
+    placeholderData.value = PopupMangerState.WaterFallData.placeholderData
+    categories.value = PopupMangerState.WaterFallData.categories
     const option: EChartsOption = {
-
-
+        
+        
         xAxis: {
             type: 'time',
             splitLine: {show: false},
@@ -120,9 +122,7 @@ watch(() => PopupMangerState.selectTabs, (newData) => {
 })
 watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
     if (oldValue === false && newData === true) {
-        actualData.value = PopupMangerState.WaterFallData.actualData
-        placeholderData.value = PopupMangerState.WaterFallData.placeholderData
-        categories.value = PopupMangerState.WaterFallData.categories
+    
         setTimeout(() => {
             updateChart();
         }, 500);

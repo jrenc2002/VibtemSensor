@@ -16,8 +16,11 @@ let standardValue = ref(0);
 const PopupMangerState = usePopupMangerState()
 
 const updateChart = () => {
+    
     if (!chartDiv.value || !chartEch) return;
-
+    data.value = PopupMangerState.GraphData
+    
+    
     const option: EChartsOption = {
         tooltip: {
             trigger: 'axis',
@@ -144,7 +147,6 @@ watch(() => PopupMangerState.selectTabs, (newData) => {
 })
 watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
     if (oldValue === false && newData === true) {
-        data.value = PopupMangerState.GraphData
 
         setTimeout(() => {
             updateChart();
@@ -153,6 +155,7 @@ watch(() => PopupMangerState.isShowPop, (newData, oldValue) => {
 
 })
 onMounted(() => {
+    
     setTimeout(() => {
         if (chartDiv.value) {
             chartEch = init(chartDiv.value);
