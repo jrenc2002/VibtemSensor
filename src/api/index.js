@@ -39,7 +39,6 @@ const DeviceManage = useDeviceManage();
 // 对设备管理器初始化-添加外部监听
 
 
-
 // 添加设备-对
 export const addDevice = async (ip, port, name) => {
     // 验证输入的有效性
@@ -115,6 +114,7 @@ export const addDevice = async (ip, port, name) => {
 
 
 // 关闭设备-对
+// 关闭设备-对
 export const closeDevice = async (index) => {
     // 检查 index 是否有效
     if (typeof index !== 'number' || index < 0 || index >= DeviceManage.deviceList.length) {
@@ -141,15 +141,19 @@ export const closeDevice = async (index) => {
     
     // 关闭editSocket
     promises.push(safelyClose(deviceInfo.editSocket, '编辑连接'));
-    deviceInfo.editSocket = null; // 确保资源引用已被清除
     
     // 关闭sockets中的每个deviceSocket
     for (let id = 0; id < 6; id++) {
         promises.push(safelyClose(deviceInfo.sockets[id], '控制板', id + 1));
-        deviceInfo.sockets[id] = null; // 确保资源引用已被清除
     }
     
     await Promise.all(promises);
+    
+    // 清除引用
+    deviceInfo.editSocket = null;
+    for (let id = 0; id < 6; id++) {
+        deviceInfo.sockets[id] = null;
+    }
 }
 
 // 打开设备-对
@@ -198,14 +202,14 @@ export const openDevice = async (index) => {
     };
     
     // 打开或重新添加editSocket连接
-    if (!deviceInfo.editSocket) {
+    if (deviceInfo.editSocket === null) {
         await handleDeviceConnection(9, true);
     }
     
     // 打开或重新添加sensorsData中的设备连接
     const promises = Array.from({length: 6}, async (_, idx) => {
         const id = idx + 1;
-        if (!deviceInfo.sensorsData[id - 1] || !deviceInfo.sensorsData[id - 1].deviceSocket) {
+        if (deviceInfo.sockets[id - 1] === null) {
             return handleDeviceConnection(id);
         }
     });
@@ -219,6 +223,40 @@ export const openDevice = async (index) => {
  * @param {Object} substation - 分站数据。
  */
 export const updateSubstationData = async (substationIndex) => {
+    const editSocket = DeviceManage.deviceList[substationIndex].editSocket;
+    // 编辑socket
+    if (!editSocket) {
+        console.warn(`分站的editSocket未连接`);
+        return;
+    }
+    let floatDataEdit;
+    
+    try {
+        //TODO 长数据通讯问题
+        try {
+            let floatDataEdita = await editSocket.readHoldingRegisters(0, 20);
+            console.log(floatDataEdita, '-20');
+        } catch (error) {
+            console.error("Error reading registers 0-19:", error.message);
+        }
+        try {
+            let floatDataEdit = await editSocket.readHoldingRegisters(20, 20);
+            console.log(floatDataEdit, '-20');
+        } catch (error) {
+            console.error("Error reading registers 0-19:", error.message);
+        }
+        
+        
+        let floatDataEditone = await editSocket.readHoldingRegisters(40, 20); // Adjusted count
+        console.log(floatDataEditone, '20');
+        
+        let floatDataEdittwo = await editSocket.readHoldingRegisters(60, 20); // Adjusted start address
+        console.log(floatDataEdittwo, '40');
+        
+        
+    } catch (error) {
+        console.error(`分站的editSocket读取失败`, error);
+    }
     // 遍历所有的控制板
     for (let boardIndex = 0; boardIndex < DeviceManage.deviceList[substationIndex].sockets.length; boardIndex++) {
         const socket = DeviceManage.deviceList[substationIndex].sockets[boardIndex];
@@ -233,18 +271,20 @@ export const updateSubstationData = async (substationIndex) => {
             // 从socket读取20个存储单元
             // 直接使用API提供的方法得到浮点数数据
             const floatData = await socket.readHoldingRegisters(0, 20);
-            
+            console.log(floatData)
             // 更新传感器数据
             for (let sensorIndex = 0; sensorIndex < 5; sensorIndex++) {
                 const sensor = DeviceManage.deviceList[substationIndex].sensorsData[boardIndex][sensorIndex];
                 sensor.current_data.temperature_data = parseFloat(floatData[sensorIndex * 2].toFixed(2));
                 sensor.current_data.vibration_data = parseFloat(floatData[sensorIndex * 2 + 1].toFixed(2));
-                
+                // sensor.current_data.temperature_threshold = parseFloat(floatDataEdit[sensorIndex * 2+boardIndex*10].toFixed(2));
+                // sensor.current_data.vibration_threshold = parseFloat(floatDataEdit[sensorIndex * 2 +boardIndex*10+ 1].toFixed(2));
+    
                 // Check if values exceed the thresholds
                 const isTemperatureAlerted = sensor.current_data.temperature_data >= sensor.current_data.temperature_threshold;
                 const isVibrationAlerted = sensor.current_data.vibration_data >= sensor.current_data.vibration_threshold;
                 const isAlerted = isTemperatureAlerted || isVibrationAlerted; // Alert if any of the values exceed their respective thresholds
-                
+    
                 await window.Electron.ipcRenderer.invoke('add-data-item', {
                     device_id: sensor.device_id,
                     vibration_data: sensor.current_data.vibration_data,
@@ -259,6 +299,8 @@ export const updateSubstationData = async (substationIndex) => {
             console.error(`从控制板${boardIndex + 1}读取数据时发生错误:`, error);
         }
     }
+    
+    
 }
 
 
@@ -266,7 +308,6 @@ export const updateSubstationData = async (substationIndex) => {
 export const sendData = (index, data) => {
     
     //分包发送
-    
     if (DeviceManage.deviceList[index].nowData !== undefined && DeviceManage.deviceList[index].nowData !== null) {
         
         // 将对象的键拆分成每6个一组的数组

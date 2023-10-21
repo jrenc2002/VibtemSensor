@@ -16,18 +16,19 @@ const data = ref([]);
 
 // 这里假设你需要读取的开始地址是0，需要读取的寄存器数量是20
 const startAddress = 0;
-const numRegisters = 20;
+const numRegisters = 60;
 
 const fetchData = async () => {
     console.log("fetchData");
     try {
-        
-        const modbus = window.useModbusAPI.new('192.168.0.1', 502, 1);
+    
+        const modbus = window.useModbusAPI.new('192.168.0.1', 502, 9);
         console.log("Before connection...");
         await modbus.connect();
         console.log("After connection...");
         // TODO Modbus已经成功连接，之前连接不成功是因为没有Close，他不会自动Close，所以连接失败。现在的问题是接受失败。
         const fetchedData = await modbus.readHoldingRegisters(startAddress, numRegisters);
+        console.log("fetchedData", fetchedData);
         data.value = fetchedData;
         modbus.close();
         console.log("close connection...");

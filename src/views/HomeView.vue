@@ -50,7 +50,7 @@ import {onMounted, onUnmounted, reactive} from 'vue';
 import NavigationView from '../components/NavigationView.vue';
 import {useDeviceManage} from '@/store/DeviceManage'
 import {useAppGlobal} from '@/store/AppGlobal'
-import {openDevice, updateSubstationData} from '@/api'
+import {updateSubstationData} from '@/api'
 
 const AppGlobal = useAppGlobal();
 const DeviceManage = useDeviceManage();
@@ -95,33 +95,33 @@ onMounted(() => {
         }
     );
     InitSensorsData();
-    initDeviceManage();
+    // initDeviceManage();
     getAllData();
     
 });
-const initDeviceManage = () => {
-    if (!Array.isArray(DeviceManage.deviceList)) {
-        console.error("DeviceManage.deviceList不存在或不是数组");
-        return;
-    }
-    
-    try {
-        DeviceManage.deviceList.forEach((item, index) => {
-            try {
-                openDevice(index)
-            } catch (error) {
-                
-                console.error("设备${index}中没打开");
-                
-            }
-        });
-        
-        
-    } catch (error) {
-        console.error("初始化设备中发生错误：", error);
-    }
-    
-};
+// const initDeviceManage = () => {
+//     if (!Array.isArray(DeviceManage.deviceList)) {
+//         console.error("DeviceManage.deviceList不存在或不是数组");
+//         return;
+//     }
+//
+//     try {
+//         DeviceManage.deviceList.forEach((item, index) => {
+//             try {
+//                 openDevice(index)
+//             } catch (error) {
+//
+//                 console.error("设备${index}中没打开");
+//
+//             }
+//         });
+//
+//
+//     } catch (error) {
+//         console.error("初始化设备中发生错误：", error);
+//     }
+//
+// };
 
 const getAllData = () => {
 // 设置定时器，例如每10秒钟读取一次所有分站数据

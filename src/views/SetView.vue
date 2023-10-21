@@ -47,16 +47,25 @@
             <div
                     class="rounded-md mx-5 mt-4 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
-                       for="name">温度报警上限</label>
-                <input id="name" v-model="Content.TempAlarm" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
-        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入温度报警上限"
+                       for="name">振动标定系数</label>
+                <input id="name" v-model="Content.VibrationCoefficent" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标定系数"
                        type="text"/>
             </div>
             <div
                     class="rounded-md mx-5 mt-4 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
-                       for="name">标定系数</label>
-                <input id="name" v-model="Content.Coefficent" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+                       for="name">温度报警上限</label>
+                <input id="name" v-model="Content.TempAlarm" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入温度报警上限"
+                       type="text"/>
+            </div>
+    
+            <div
+                    class="rounded-md mx-5 mt-4 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                       for="name">温度标定系数</label>
+                <input id="name" v-model="Content.TempCoefficent" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
         hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标定系数"
                        type="text"/>
             </div>
@@ -85,14 +94,16 @@ const Content = reactive({
     TempAlarm: null,
     VibrationAlarm: null,
     Standard: null,
-    Coefficent: null
+    TempCoefficent: null,
+    VibrationCoefficent: null
     
 })
 const setZero = () => {
     Content.Standard = null;
     Content.VibrationAlarm = null;
     Content.TempAlarm = null;
-    Content.Coefficent = null;
+    Content.VibrationCoefficent = null;
+    Content.TempCoefficent = null;
 }
 const confirm = () => {
     Content.Coefficent = null;
