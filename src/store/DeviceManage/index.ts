@@ -18,8 +18,8 @@ interface Device {
     port: number; // 这意味着 port 是可选的
     alarm: boolean;
     sensorsData: any[];
-    sockets: any[];
-    editSocket: null;
+    status: number;
+    is_alerted: boolean
     
     
 }
@@ -56,8 +56,8 @@ export const useDeviceManage = defineStore('DeviceManage', {
                 port: port,
                 alarm: false,
                 sensorsData: Array(6).fill([]),  // 初始化为6个空数组，代表6个控制板
-                sockets: Array(6).fill(null),  // 初始化为6个null，代表6个控制板的sockets
-                editSocket: null
+                status: 1,
+                is_alerted: false
             };
         
             // 先创建分站
@@ -87,6 +87,10 @@ export const useDeviceManage = defineStore('DeviceManage', {
                             temperature_data: 0,
                             vibration_threshold: 999,
                             temperature_threshold: 999,
+                            TempCoefficent: 1,
+                            VibrationCoefficent: 1,
+                            is_alerted: false
+    
                         }
                     };
                     newDevice.sensorsData[i].push(sensorData);
@@ -110,56 +114,36 @@ export const useDeviceManage = defineStore('DeviceManage', {
         },
         // 更新设备表，但是不更新传感器表，传感器表放后面更新
         updateDeviceList(res: any[]) {
-
+            const newDeviceList: Device[] = []; // 初始化一个新的设备列表
+    
             if (res) {
                 for (const item of res) {
-                    if (this.deviceList.length > AppGlobal.limitDivceNum) {
-                        return -1;
+                    if (newDeviceList.length > AppGlobal.limitDivceNum) {
+                        break;  // 当超过设备限制时，停止处理
                     }
                     if (item.substation_id && item.substation_ip && item.substation_port && item.substation_name) {
-                        const newId = this.deviceList.length;
-    
+                        const newId = newDeviceList.length;  // 使用新列表的长度作为ID
+                
                         const newDevice: Device = {
-                            id: newId,//从0开始
+                            id: newId,
                             substation_id: item.substation_id,
                             name: item.substation_name,
                             ip: item.substation_ip,
                             port: item.substation_port,
                             alarm: false,
-                            editSocket: null, // 初始化编辑socket
-                            sockets: [null, null, null, null, null, null],  // 初始化控制板sockets
-                            sensorsData: []  // 初始化传感器数据
+                            status: 1,
+                            sensorsData: Array(6).fill([]),  // 初始化为6个空数组，代表6个控制板
+                            is_alerted: false
                         };
-                        this.deviceList.push(newDevice);
+                
+                        newDeviceList.push(newDevice);
                     }
-    
                 }
+            }
     
-            }
-        },
-        updateDeviceListData(index: number, newDeviceData: any[] | null | number) {
-            console.log('newDeviceData', newDeviceData)
-            if (typeof newDeviceData === 'number') {
-                if (newDeviceData === -1) console.log("Error")
-                return;
-            }
-        
-            if (newDeviceData) {  // 确保 nowData 不为 null
-            
-                /*——————————————————————————————对状态的处理———————————————————————————————————*/
-                // 未连接-未连接不会进行数据处理，在这里进行数据处理的只有已连接和报警两个选项
-            
-                // 已连接-已连接的设备如果没有修改通讯标志进行修改
-            
-                // 运行中-刚开始运行，状态还没变过来
-            
-                // 报警
-            
-            
-            }
-        
-        
-        },
+            this.deviceList = newDeviceList;  // 覆盖原有的设备列表
+            console.log('设备列表已更新！');
+        }
     
     
     },

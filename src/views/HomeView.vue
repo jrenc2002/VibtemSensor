@@ -7,7 +7,7 @@
         <div
                 class="drawer h-full   relative rounded-[15px] flex items-center pl-[0.3rem] pt-[0.2rem] pb-[0.2rem] overflow-hidden transition-all duration-300 ease-in-out"
                 v-bind:class="{ 'w-[15rem]': isDrawerVisible.visible, 'w-0': !isDrawerVisible.visible }">
-
+    
             <!-- 根据计算设置元素的宽度和高度，并设置元素的背景颜色，同时定义了元素的类名 -->
             <div :style="{ width: 'calc(100% )', height: 'calc(100% - 0.3rem)' }"
                  class="box-border  shadow bg-white   rounded-[15px] flex flex-col p-[0.5rem] justify-center items-center gap-6 inline-flex bg-opacity-80">
@@ -20,8 +20,8 @@
             </div>
 
         </div>
-
-
+    
+    
         <!-- 右侧样式 -->
         <!-- 'w-4/5' 意味着当抽屉可见时，右侧样式占据 4/5 的屏幕宽度。'w-full' 和 'ml-[-0.3rem]' 意味着当抽屉不可见时，右侧样式占据全屏，且左侧有 0.3rem 的间隙 -->
         <div
@@ -57,7 +57,7 @@ const DeviceManage = useDeviceManage();
 // 使用 Vue3 的 reactive 函数来创建一个响应式对象，用于控制抽屉的显示状态
 const isDrawerVisible = reactive({
     visible: true
-
+    
 });
 
 // 定义一个函数，用于切换抽屉的显示状态
@@ -70,12 +70,12 @@ const toggleDrawer = () => {
 const updateWindowSize = () => {
     if (window.innerWidth / window.innerHeight <= 1.5 || window.innerWidth <= 900) {
         isDrawerVisible.visible = false;
-
+    
         AppGlobal.updateDrawerState(isDrawerVisible.visible)
-
+    
     } else {
         isDrawerVisible.visible = true;
-
+    
         AppGlobal.updateDrawerState(isDrawerVisible.visible)
     }
 }
@@ -94,48 +94,30 @@ onMounted(() => {
             console.log(res);
         }
     );
-    InitSensorsData();
-    // initDeviceManage();
+    if (!hasInitializedSensorsData) {
+        InitSensorsData();
+        hasInitializedSensorsData = true; // 设置标志为true
+    }
     getAllData();
     
+    
 });
-// const initDeviceManage = () => {
-//     if (!Array.isArray(DeviceManage.deviceList)) {
-//         console.error("DeviceManage.deviceList不存在或不是数组");
-//         return;
-//     }
-//
-//     try {
-//         DeviceManage.deviceList.forEach((item, index) => {
-//             try {
-//                 openDevice(index)
-//             } catch (error) {
-//
-//                 console.error("设备${index}中没打开");
-//
-//             }
-//         });
-//
-//
-//     } catch (error) {
-//         console.error("初始化设备中发生错误：", error);
-//     }
-//
-// };
+
+let hasInitializedSensorsData = false; // 外部标志
 
 const getAllData = () => {
-// 设置定时器，例如每10秒钟读取一次所有分站数据
-    const UPDATE_INTERVAL = 1000; // 1秒
+    const UPDATE_INTERVAL = 5000; // 10秒
     
-    setInterval(() => {
+    function updateData() {
+        console.time("updateDataExecutionTime"); // 开始追踪时间
+        
         // 使用Promise.all确保所有分站数据同时异步更新
         const updatePromises = DeviceManage.deviceList.map(async (substation) => {
             try {
-                if (substation.editSocket !== null) {
-                    console.log(DeviceManage.deviceList)
+                if (substation.status !== 0) {
+                    console.log(DeviceManage.deviceList);
                     await updateSubstationData(substation.id);
                 }
-                
             } catch (error) {
                 console.error(`更新分站${substation.id}数据时发生错误:`, error);
             }
@@ -143,14 +125,22 @@ const getAllData = () => {
         
         // 当所有分站数据更新完成后
         Promise.all(updatePromises).then(() => {
-            // console.log("所有分站数据已更新");
+            console.log("所有分站数据已更新");
+            // 该更新完成后再设置下一次更新
+            setTimeout(updateData, UPDATE_INTERVAL);
         }).catch((error) => {
             console.error("更新某些分站数据时发生错误:", error);
+            // 即使出现错误，也设置下一次更新
+            setTimeout(updateData, UPDATE_INTERVAL);
+        }).finally(() => {
+            console.timeEnd("updateDataExecutionTime"); // 结束追踪时间并输出结果
         });
-        
-    }, UPDATE_INTERVAL);
+    }
     
+    // 首次调用
+    setTimeout(updateData, 3000);
 }
+
 // 初始化数据，从数据库获取传感器表
 const InitSensorsData = async () => {
     try {
@@ -174,6 +164,9 @@ const InitSensorsData = async () => {
                                 temperature_data: 0,
                                 vibration_threshold: 999,
                                 temperature_threshold: 999,
+                                TempCoefficent: 1,
+                                VibrationCoefficent: 1,
+                                is_alerted: false
                             }
                         }));
                         organizedSensorsData.push(controlBoardSensors);

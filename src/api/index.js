@@ -55,65 +55,13 @@ export const addDevice = async (ip, port, name) => {
         return;
     }
     
-    const deviceInfo = DeviceManage.deviceList[index];
     
-    // 初始化sockets为null
-    deviceInfo.sockets = [null, null, null, null, null, null];
-    deviceInfo.editSocket = null;
+    DeviceManage.deviceList[index].status = 1;
     
-    try {
-        // 使用Promise.all进行并行连接
-        const promises = Array.from({length: 6}, async (_, idx) => {
-            const id = idx + 1;
-            const deviceSocket = window.useModbusAPI.new(ip, port, id);
-            const device = await deviceSocket.connect();
-            
-            device.on('connect', () => {
-                deviceInfo.sockets[id - 1] = device;
-                console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${id} 连接成功`);
-            });
-            
-            device.on('error', (err) => {
-                deviceInfo.sockets[id - 1] = null;
-                console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${id} 连接失败，错误信息:`, err);
-            });
-            
-            device.on('disconnect', () => {
-                deviceInfo.sockets[id - 1] = null;
-                console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${id} 连接断开`);
-            });
-            
-            return device; // 返回设备作为promise的结果
-        });
-        
-        await Promise.all(promises);
-        
-        // 创建编辑socket
-        const editDeviceSocket = window.useModbusAPI.new(ip, port, 9);
-        const editDevice = await editDeviceSocket.connect();
-        
-        editDevice.on('connect', () => {
-            deviceInfo.editSocket = editDevice;
-            console.log(`${deviceInfo.ip}:${deviceInfo.port} 编辑socket连接成功`);
-        });
-        
-        editDevice.on('error', (err) => {
-            deviceInfo.editSocket = null;
-            console.log(`${deviceInfo.ip}:${deviceInfo.port} 编辑socket连接失败，错误信息:`, err);
-        });
-        
-        editDevice.on('disconnect', () => {
-            deviceInfo.editSocket = null;
-            console.log(`${deviceInfo.ip}:${deviceInfo.port} 编辑socket连接断开`);
-        });
-        
-    } catch (error) {
-        console.error("设备连接中发生错误：", error);
-    }
+    
 }
 
 
-// 关闭设备-对
 // 关闭设备-对
 export const closeDevice = async (index) => {
     // 检查 index 是否有效
@@ -122,38 +70,11 @@ export const closeDevice = async (index) => {
         return;
     }
     
-    const deviceInfo = DeviceManage.deviceList[index];
     
-    // 封装关闭逻辑并集中处理错误
-    const safelyClose = async (device, deviceType, deviceId) => {
-        if (device) {
-            try {
-                await device.close();
-                console.log(`设备 ${index} 的${deviceType} ${deviceId ? `控制板 ${deviceId}` : ''} 连接已成功关闭`);
-            } catch (error) {
-                console.error(`关闭设备 ${index} 的${deviceType} ${deviceId ? `控制板 ${deviceId}` : ''} 连接时出错:`, error);
-            }
-        }
-    }
+    DeviceManage.deviceList[index].status = 0;
     
-    // 使用Promise.all进行并行断开连接
-    const promises = [];
     
-    // 关闭editSocket
-    promises.push(safelyClose(deviceInfo.editSocket, '编辑连接'));
     
-    // 关闭sockets中的每个deviceSocket
-    for (let id = 0; id < 6; id++) {
-        promises.push(safelyClose(deviceInfo.sockets[id], '控制板', id + 1));
-    }
-    
-    await Promise.all(promises);
-    
-    // 清除引用
-    deviceInfo.editSocket = null;
-    for (let id = 0; id < 6; id++) {
-        deviceInfo.sockets[id] = null;
-    }
 }
 
 // 打开设备-对
@@ -163,144 +84,124 @@ export const openDevice = async (index) => {
         console.error(`无效的设备索引: ${index}`);
         return;
     }
-    console.log(1231)
-    const deviceInfo = DeviceManage.deviceList[index];
     
-    const handleDeviceConnection = async (id, isEditSocket = false) => {
-        let targetDevice;
-        
-        try {
-            console.log(deviceInfo.ip, deviceInfo.port, id);
-            targetDevice = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port, id);
-            if (isEditSocket) {
-                deviceInfo.editSocket = targetDevice;
-            } else {
-                deviceInfo.sockets[id - 1] = targetDevice;
-            }
-            // 先绑定事件处理器
-            targetDevice.on('connect', () => {
-                
-                console.log(`${deviceInfo.ip}:${deviceInfo.port} ${isEditSocket ? 'editSocket' : 'sensorsData id:' + id} 连接成功`);
-            });
-            
-            targetDevice.on('error', (err) => {
-                console.log(`${deviceInfo.ip}:${deviceInfo.port} ${isEditSocket ? 'editSocket' : 'sensorsData id:' + id} 连接失败，错误信息:`, err);
-            });
-            
-            targetDevice.on('disconnect', () => {
-                console.log(`${deviceInfo.ip}:${deviceInfo.port} ${isEditSocket ? 'editSocket' : 'sensorsData id:' + id} 连接断开`);
-            });
-            
-            // 现在进行连接操作
-            await targetDevice.connect(deviceInfo.ip, deviceInfo.port, id);
-            
-        } catch (error) {
-            console.error(`${deviceInfo.ip}:${deviceInfo.port} ${isEditSocket ? 'editSocket' : 'sensorsData id:' + id} 连接过程中出现错误:`, error);
-        }
-        
-        return targetDevice;
-    };
+    DeviceManage.deviceList[index].status = 1;
     
-    // 打开或重新添加editSocket连接
-    if (deviceInfo.editSocket === null) {
-        await handleDeviceConnection(9, true);
-    }
     
-    // 打开或重新添加sensorsData中的设备连接
-    const promises = Array.from({length: 6}, async (_, idx) => {
-        const id = idx + 1;
-        if (deviceInfo.sockets[id - 1] === null) {
-            return handleDeviceConnection(id);
-        }
-    });
-    
-    await Promise.all(promises);
 }
+
 
 /**
  * 更新分站中所有控制板的传感器数据。
  *
  * @param {Object} substation - 分站数据。
  */
-export const updateSubstationData = async (substationIndex) => {
-    const editSocket = DeviceManage.deviceList[substationIndex].editSocket;
-    // 编辑socket
-    if (!editSocket) {
-        console.warn(`分站的editSocket未连接`);
-        return;
-    }
-    let floatDataEdit;
-    
+const fetchDataFromModbus = async (ip, port, id, startAddress = 0, numRegisters = 20) => {
     try {
-        //TODO 长数据通讯问题
-        try {
-            let floatDataEdita = await editSocket.readHoldingRegisters(0, 20);
-            console.log(floatDataEdita, '-20');
-        } catch (error) {
-            console.error("Error reading registers 0-19:", error.message);
-        }
-        try {
-            let floatDataEdit = await editSocket.readHoldingRegisters(20, 20);
-            console.log(floatDataEdit, '-20');
-        } catch (error) {
-            console.error("Error reading registers 0-19:", error.message);
-        }
-        
-        
-        let floatDataEditone = await editSocket.readHoldingRegisters(40, 20); // Adjusted count
-        console.log(floatDataEditone, '20');
-        
-        let floatDataEdittwo = await editSocket.readHoldingRegisters(60, 20); // Adjusted start address
-        console.log(floatDataEdittwo, '40');
-        
-        
+        const modbus = window.useModbusAPI.new(ip, port, id);
+        await modbus.connect();
+        const fetchedData = await modbus.readHoldingRegisters(startAddress, numRegisters);
+        console.log("fetchedData", fetchedData);
+        modbus.close();
+        console.log("close connection...");
+        return fetchedData;
     } catch (error) {
-        console.error(`分站的editSocket读取失败`, error);
+        console.error(`从 ${ip}:${port} ID ${id} 读取数据时发生错误:`, error);
+        return null;
     }
-    // 遍历所有的控制板
-    for (let boardIndex = 0; boardIndex < DeviceManage.deviceList[substationIndex].sockets.length; boardIndex++) {
-        const socket = DeviceManage.deviceList[substationIndex].sockets[boardIndex];
-        
-        // 如果socket为null，则跳过
-        if (!socket) {
-            // console.warn(`控制板${boardIndex + 1}的socket未连接`);
-            continue;
-        }
-        
+};
+
+
+export const updateSubstationData = async (substationIndex) => {
+    const deviceInfo = DeviceManage.deviceList[substationIndex];
+    
+    // Load calibration coefficients and alert thresholds
+    let calibrationCoefficients = [];
+    let alertThresholds = [];
+    
+    for (let i = 0; i < 6; i++) {
         try {
-            // 从socket读取20个存储单元
-            // 直接使用API提供的方法得到浮点数数据
-            const floatData = await socket.readHoldingRegisters(0, 20);
-            console.log(floatData)
-            // 更新传感器数据
-            for (let sensorIndex = 0; sensorIndex < 5; sensorIndex++) {
-                const sensor = DeviceManage.deviceList[substationIndex].sensorsData[boardIndex][sensorIndex];
-                sensor.current_data.temperature_data = parseFloat(floatData[sensorIndex * 2].toFixed(2));
-                sensor.current_data.vibration_data = parseFloat(floatData[sensorIndex * 2 + 1].toFixed(2));
-                // sensor.current_data.temperature_threshold = parseFloat(floatDataEdit[sensorIndex * 2+boardIndex*10].toFixed(2));
-                // sensor.current_data.vibration_threshold = parseFloat(floatDataEdit[sensorIndex * 2 +boardIndex*10+ 1].toFixed(2));
-    
-                // Check if values exceed the thresholds
-                const isTemperatureAlerted = sensor.current_data.temperature_data >= sensor.current_data.temperature_threshold;
-                const isVibrationAlerted = sensor.current_data.vibration_data >= sensor.current_data.vibration_threshold;
-                const isAlerted = isTemperatureAlerted || isVibrationAlerted; // Alert if any of the values exceed their respective thresholds
-    
-                await window.Electron.ipcRenderer.invoke('add-data-item', {
-                    device_id: sensor.device_id,
-                    vibration_data: sensor.current_data.vibration_data,
-                    temperature_data: sensor.current_data.temperature_data,
-                    vibration_threshold: sensor.current_data.vibration_threshold,
-                    temperature_threshold: sensor.current_data.temperature_threshold,
-                    is_alerted: isAlerted
+            const calibrationData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, i + 9);
+            if (calibrationData === null) {
+                calibrationCoefficients.push({
+                    temperature_coefficient: -1,
+                    vibration_coefficient: -1
                 });
-                
+            } else {
+                calibrationCoefficients.push({
+                    temperature_coefficient: calibrationData[0],
+                    vibration_coefficient: calibrationData[1]
+                });
+            }
+            
+            
+            const thresholdData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, i + 19); // i+6 + 1 (因为i从0开始)
+            
+            if (calibrationData === null) {
+                thresholdData.push({
+                    temperature_coefficient: -1,
+                    vibration_coefficient: -1
+                });
+            } else {
+                thresholdData.push({
+                    temperature_threshold: thresholdData[0],
+                    vibration_threshold: thresholdData[1]
+                });
             }
         } catch (error) {
-            console.error(`从控制板${boardIndex + 1}读取数据时发生错误:`, error);
+            console.error(`分站${substationIndex}从editSocket ${i + 1} 读取数据时发生错误:`, error);
         }
     }
     
+    // Iterate over each control board
+    for (let boardIndex = 0; boardIndex < 6; boardIndex++) {
+        try {
+            let floatData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, boardIndex + 1);  // 加1是因为boardIndex从0开始
+            if (floatData === null) {
+                floatData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, boardIndex + 1);  // 加1是因为boardIndex从0开始
+                
+            }
+            // Update sensor data
+            for (let sensorIndex = 0; sensorIndex < 5; sensorIndex++) {
+                const temperatureData = parseFloat(floatData[sensorIndex * 2].toFixed(2));
+                const vibrationData = parseFloat(floatData[sensorIndex * 2 + 1].toFixed(2));
+                
+                // Update real-time data
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_data = temperatureData;
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_data = vibrationData;
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold = alertThresholds[boardIndex].temperature_threshold === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold : alertThresholds[boardIndex].temperature_threshold;
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold = alertThresholds[boardIndex].vibration_threshold === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold : alertThresholds[boardIndex].vibration_threshold;
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent = calibrationCoefficients[boardIndex].temperature_coefficient !== -1 ? calibrationCoefficients[boardIndex].temperature_coefficient : deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent;
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent = calibrationCoefficients[boardIndex].vibration_coefficient !== -1 ? calibrationCoefficients[boardIndex].vibration_coefficient : deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent;
+                
+                
+                // Check for threshold exceedances
+                const isTemperatureAlerted = temperatureData >= deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold;
+                const isVibrationAlerted = vibrationData >= deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold;
+                const isAlerted = isTemperatureAlerted || isVibrationAlerted;
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.is_alerted = isAlerted;
+                if (isAlerted === true) {
+                    deviceInfo.alarm = true
+                }
+                
+                await window.Electron.ipcRenderer.invoke('add-data-item', {
+                    device_id: deviceInfo.sensorsData[boardIndex][sensorIndex].device_id,
+                    vibration_data: vibrationData,
+                    temperature_data: temperatureData,
+                    vibration_threshold: deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold,
+                    temperature_threshold: deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold,
+                    vibration_coefficient: calibrationCoefficients[boardIndex].vibration_coefficient,
+                    temperature_coefficient: calibrationCoefficients[boardIndex].temperature_coefficient,
+                    is_alerted: isAlerted
+                });
+            }
+        } catch (error) {
+            console.error(`分站${substationIndex}从控制板${boardIndex + 1}读取数据时发生错误:`, error);
+        }
+    }
     
+    // After updating the deviceInfo, assign it back to DeviceManage.deviceList
+    DeviceManage.deviceList[substationIndex] = deviceInfo;
 }
 
 

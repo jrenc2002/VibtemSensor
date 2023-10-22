@@ -42,9 +42,9 @@
     
                                     <span
                                             :class="[team.current ? 'text-[#1EA5FC] border-[#1EA5FC]' : 'text-gray-400 border-gray-200 group-hover:border-[#1EA5FC] group-hover:text-[#1EA5FC]',
-                                            (DeviceManage.deviceList[team.id].editSocket===null)?'bg-gray-200 ':'',
-                                            (DeviceManage.deviceList[team.id].editSocket!==null&&DeviceManage.deviceList[team.id].alarm===true)?'bg-red-400':'',
-                                            (DeviceManage.deviceList[team.id].editSocket!==null&&DeviceManage.deviceList[team.id].alarm!==true)?'bg-white':''
+                                            (DeviceManage.deviceList[team.id].status===0)?'bg-gray-200 ':'',
+                                            (DeviceManage.deviceList[team.id].status!==0&&DeviceManage.deviceList[team.id].alarm===true)?'bg-red-400':'',
+                                            (DeviceManage.deviceList[team.id].status!==0&&DeviceManage.deviceList[team.id].alarm!==true)?'bg-white':''
                                              ,'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium ']"
                                     >
                                       {{ team.id }}

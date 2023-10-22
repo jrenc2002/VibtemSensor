@@ -24,7 +24,7 @@ contextBridge.exposeInMainWorld('useModbusAPI', {
 class ModbusInstance {
     constructor() {
         this.client = new ModbusRTU();
-        this.client.setTimeout(5000);  // Set timeout to 5 seconds
+        this.client.setTimeout(1000);  // Set timeout to 5 seconds
     
     }
     

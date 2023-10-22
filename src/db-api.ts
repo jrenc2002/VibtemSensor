@@ -46,6 +46,8 @@ export function createInitDB(): any {
                     temperature_data REAL NOT NULL,              -- 温度实时数据
                     vibration_threshold REAL NOT NULL,           -- 振动报警上限
                     temperature_threshold REAL NOT NULL,         -- 温度报警上限
+                    vibration_coefficient REAL NOT NULL,         -- 振动系数
+                    temperature_coefficient REAL NOT NULL,       -- 温度系数
                     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,-- 数据存入时间，默认为当前时间
                     is_hidden BOOLEAN NOT NULL DEFAULT 0,        -- 数据是否隐藏，默认为0（不隐藏）
                     is_alerted BOOLEAN NOT NULL DEFAULT 0,       -- 数据是否报警，默认为0（无报警）
@@ -132,20 +134,25 @@ export function createInitDB(): any {
         temperature_data: number,
         vibration_threshold: number,
         temperature_threshold: number,
+        vibration_coefficient: number,     // 新增的振动系数
+        temperature_coefficient: number,   // 新增的温度系数
         is_alerted: boolean
     }) => {
         try {
             return new Promise((resolve, reject) => {
                 const query = `
                 INSERT INTO data_item(
-                    device_id, vibration_data, temperature_data, vibration_threshold, 
-                    temperature_threshold, is_alerted
+                    device_id, vibration_data, temperature_data, vibration_threshold,
+                    temperature_threshold, vibration_coefficient, temperature_coefficient, is_alerted
+  
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `;
                 db.run(query, [
                     data.device_id, data.vibration_data, data.temperature_data,
-                    data.vibration_threshold, data.temperature_threshold, data.is_alerted
+                    data.vibration_threshold, data.temperature_threshold,
+                    data.vibration_coefficient, data.temperature_coefficient,  // 新增的字段
+                    data.is_alerted
                 ], function (err: Error) {
                     if (err) {
                         console.error("Error adding data to data_item:", err);
