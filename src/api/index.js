@@ -96,101 +96,78 @@ export const openDevice = async (index) => {
  *
  * @param {Object} substation - 分站数据。
  */
-const fetchDataFromModbus = async (ip, port, id, startAddress = 0, numRegisters = 20) => {
+const fetchDataFromModbus = async (ip, port, startAddress = 0, numRegisters = 360) => {
     try {
-        const modbus = window.useModbusAPI.new(ip, port, id);
-        await modbus.connect(ip, port, id);
-    
+        const modbus = window.useModbusAPI.new(ip, port);
+        await modbus.connect(ip, port);
+        
         const fetchedData = await modbus.readHoldingRegisters(startAddress, numRegisters);
-        console.log("fetchedData", fetchedData, ip, port, id)
+        console.log("fetchedData", fetchedData, ip, port)
         modbus.close();
         console.log("close connection...");
         return fetchedData;
     } catch (error) {
-        console.error(`从 ${ip}:${port} ID ${id} 读取数据时发生错误:`, error);
+        console.error(`从 ${ip}:${port} 读取数据时发生错误:`, error);
         return null;
     }
 };
 
-
 export const updateSubstationData = async (substationIndex) => {
     const deviceInfo = DeviceManage.deviceList[substationIndex];
     
-    // Load calibration coefficients and alert thresholds
-    let calibrationCoefficients = [];
-    let alertThresholds = [];
+    const allData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port);
     
-    for (let i = 0; i < 6; i++) {
-        try {
-            const calibrationData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, i + 9);
-            if (calibrationData === null) {
-                calibrationCoefficients.push({
-                    vibration_coefficient: -1,
-                    temperature_coefficient: -1
-                });
-            } else {
-                calibrationCoefficients.push({
-                    vibration_coefficient: calibrationData[0],
-                    temperature_coefficient: calibrationData[1]
-                });
-            }
-            const thresholdData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, i + 19); // i+6 + 1 (因为i从0开始)
-            if (calibrationData === null) {
-                alertThresholds.push({
-                    temperature_coefficient: -1,
-                    vibration_coefficient: -1
-                });
-            } else {
-                alertThresholds.push({
-                    temperature_threshold: thresholdData[1],
-                    vibration_threshold: thresholdData[0]
-                });
-            }
-        } catch (error) {
-            console.error(`分站${substationIndex}从editSocket ${i + 1} 读取数据时发生错误:`, error);
-        }
+    if (!allData) {
+        console.error(`分站${substationIndex}读取数据时发生错误: 无数据返回`);
+        return;
     }
-    // Iterate over each control board
+    
+    const sensorData = allData.slice(0, 60);
+    const coefficients = allData.slice(60, 120);
+    const thresholds = allData.slice(120, 180);
+    
     for (let boardIndex = 0; boardIndex < 6; boardIndex++) {
-        try {
-            let floatData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, boardIndex + 1);  // 加1是因为boardIndex从0开始
-
+        for (let sensorIndex = 0; sensorIndex < 5; sensorIndex++) {
+            const dataIndex = boardIndex * 10 + sensorIndex * 2;
+            
+            
+            const vibrationData = parseFloat(sensorData[dataIndex].toFixed(2));
+            const temperatureData = parseFloat(sensorData[dataIndex + 1].toFixed(2));
+            
+            const vibrationCoefficient = parseFloat(coefficients[dataIndex].toFixed(2));
+            const temperatureCoefficient = parseFloat(coefficients[dataIndex + 1].toFixed(2));
+            
+            const vibrationThreshold = parseFloat(thresholds[dataIndex].toFixed(2));
+            const temperatureThreshold = parseFloat(thresholds[dataIndex + 1].toFixed(2));
+            
+            
             // Update sensor data
-            for (let sensorIndex = 0; sensorIndex < 5; sensorIndex++) {
-                const vibrationData = parseFloat(floatData[sensorIndex * 2].toFixed(2));
-                const temperatureData = parseFloat(floatData[sensorIndex * 2 + 1].toFixed(2));
-    
-                // Update real-time data
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_data = temperatureData;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_data = vibrationData;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold = alertThresholds[boardIndex].temperature_threshold === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold : alertThresholds[boardIndex].temperature_threshold;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold = alertThresholds[boardIndex].vibration_threshold === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold : alertThresholds[boardIndex].vibration_threshold;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent = calibrationCoefficients[boardIndex].temperature_coefficient === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent : calibrationCoefficients[boardIndex].temperature_coefficient;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent = calibrationCoefficients[boardIndex].vibration_coefficient === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent : calibrationCoefficients[boardIndex].vibration_coefficient;
-    
-    
-                // Check for threshold exceedances
-                const isTemperatureAlerted = temperatureData >= deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold;
-                const isVibrationAlerted = vibrationData >= deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold;
-                const isAlerted = isTemperatureAlerted || isVibrationAlerted;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.is_alerted = isAlerted;
-                if (isAlerted === true) {
-                    deviceInfo.alarm = true
-                }
-                
-                await window.Electron.ipcRenderer.invoke('add-data-item', {
-                    device_id: deviceInfo.sensorsData[boardIndex][sensorIndex].device_id,
-                    vibration_data: vibrationData,
-                    temperature_data: temperatureData,
-                    vibration_threshold: deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold,
-                    temperature_threshold: deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold,
-                    vibration_coefficient: calibrationCoefficients[boardIndex].vibration_coefficient,
-                    temperature_coefficient: calibrationCoefficients[boardIndex].temperature_coefficient,
-                    is_alerted: isAlerted
-                });
+            deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_data = temperatureData;
+            deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_data = vibrationData;
+            deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold = temperatureThreshold;
+            deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold = vibrationThreshold;
+            deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent = temperatureCoefficient;
+            deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent = vibrationCoefficient;
+            
+            // Check for threshold exceedances
+            const isTemperatureAlerted = temperatureData >= temperatureThreshold;
+            const isVibrationAlerted = vibrationData >= vibrationThreshold;
+            const isAlerted = isTemperatureAlerted || isVibrationAlerted;
+            deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.is_alerted = isAlerted;
+            if (isAlerted === true) {
+                deviceInfo.alarm = true
             }
-        } catch (error) {
-            console.error(`分站${substationIndex}从控制板${boardIndex + 1}读取数据时发生错误:`, error);
+            
+            await window.Electron.ipcRenderer.invoke('add-data-item', {
+                device_id: deviceInfo.sensorsData[boardIndex][sensorIndex].device_id,
+                vibration_data: vibrationData,
+                temperature_data: temperatureData,
+                vibration_threshold: vibrationThreshold,
+                temperature_threshold: temperatureThreshold,
+                vibration_coefficient: vibrationCoefficient,
+                temperature_coefficient: temperatureCoefficient,
+                is_alerted: isAlerted
+            });
         }
     }
     
@@ -211,44 +188,48 @@ export const sendData = async (substationIndex, deviceId, data, kind) => {
     console.log("sendData", substationIndex, deviceId, data, kind)
     // 这个substationIndex是从0开始的，id是从1开始的
     const deviceInfo = DeviceManage.deviceList[substationIndex];
-    let registerId, addressOffset;
+    let addressOffset;
     
-    // Determine the registerId and addressOffset based on deviceId
+    // Determine the addressOffset based on deviceId
     let boardIndex = Math.floor((deviceId - 1 - substationIndex * 30) / 5);
     let sensorIndex = (deviceId - 1) % 5;
     console.log("boardIndex", boardIndex, "sensorIndex", sensorIndex)
+    
+    let baseAddress;
     switch (kind) {
         case 'temperature_coefficient':
-            registerId = 9 + boardIndex;
-            addressOffset = sensorIndex * 2;  // Because temperature comes before vibration
+            baseAddress = 60; // Starting point for coefficients
+            addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2;
             break;
         case 'vibration_coefficient':
-            registerId = 9 + boardIndex;
-            addressOffset = sensorIndex * 2 + 1;  // Vibration comes after temperature
+            baseAddress = 60; // Starting point for coefficients
+            addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2 + 1;
             break;
         case 'temperature_threshold':
-            registerId = 19 + boardIndex;
-            addressOffset = sensorIndex * 2;  // Because temperature comes before vibration
+            baseAddress = 120; // Starting point for thresholds
+            addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2;
             break;
         case 'vibration_threshold':
-            registerId = 19 + boardIndex;
-            addressOffset = sensorIndex * 2 + 1;  // Vibration comes after temperature
+            baseAddress = 120; // Starting point for thresholds
+            addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2 + 1;
             break;
         default:
             console.error("Unknown kind:", kind);
             return;
     }
-    console.log("registerId", registerId, "addressOffset", addressOffset)
+    
+    console.log("addressOffset", addressOffset)
+    
     try {
-        const modbus = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port, registerId);
+        const modbus = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port);
         
-        await modbus.connect(deviceInfo.ip, deviceInfo.port, registerId);
+        await modbus.connect(deviceInfo.ip, deviceInfo.port);
         await modbus.updateRegisterByDataIndex(addressOffset, Number(data));
         
         modbus.close();
         console.log("Data sent and connection closed...");
     } catch (error) {
-        console.error(`发送数据到 ${deviceInfo.ip}:${deviceInfo.port} ID ${registerId} 时发生错误:`, error);
+        console.error(`发送数据到 ${deviceInfo.ip}:${deviceInfo.port} addressOffset ${addressOffset} 时发生错误:`, error);
     }
 }
 
