@@ -15,7 +15,8 @@
     
                     <button v-for="machine in machines" :key="machine.id"
                             :class="machine.select?'border-[#F7BF46]':'border-gray-300'" class="relative flex items-center  rounded-lg border
-                    bg-white shadow-sm h-20  hover:border-[#F7BF46]" @click="machine.select=!machine.select">
+                    bg-white shadow-sm h-20  hover:border-[#F7BF46]"
+                            @click="machine.select=!machine.select;EditData=DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor(machine.id / 5)][machine.id % 5].current_data;">
                         <div class="min-w-0 flex-1 ">
                             <h5 class="text-xl font-none leading-6 text-gray-900 px-3">{{ machine.name }}</h5>
                         </div>
@@ -24,51 +25,98 @@
 
                 </div>
             </div>
+
         </div>
         <div class="bg-white ml-3 w-[37%] h-[97%] rounded-2xl flex-col relative items-center shadow">
-            
-            
+    
+    
             <div
                     class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">标准值</label>
-                <input id="name" v-model="Content.Standard" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+                <div class="flex ">
+                    <input id="name"
+                           v-model="Content.standard" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6"
+                           disabled
+                           name="name"
+                           type="text"/>
+                    <input id="name" v-model="Content.Standard" class="h-[50%] mx-2 w-[67%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
         hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标准值"
-                       type="text"/>
+                           type="text"/>
+                </div>
+    
             </div>
             <div
-                    class="rounded-md mx-5 mt-4 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">振动报警上限</label>
-                <input id="name" v-model="Content.VibrationAlarm" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
-        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入振动报警上限"
-                       type="text"/>
+                <div class="flex ">
+                    <input id="name"
+                           v-model="EditData.vibration_data" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6"
+                           disabled
+                           name="name"
+                           type="text"/>
+                    <input id="name" v-model="Content.VibrationAlarm" class="h-[50%] mx-2 w-[67%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标准值"
+                           type="text"/>
+                </div>
+    
             </div>
             <div
-                    class="rounded-md mx-5 mt-4 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">振动标定系数</label>
-                <input id="name" v-model="Content.VibrationCoefficent" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
-        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标定系数"
-                       type="text"/>
+                <div class="flex ">
+                    <input id="name"
+                           v-model="EditData.vibration_threshold" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6"
+                           disabled
+                           name="name"
+                           type="text"/>
+                    <input id="name" v-model="Content.VibrationCoefficent" class="h-[50%] mx-2 w-[67%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标准值"
+                           type="text"/>
+                </div>
+    
             </div>
             <div
-                    class="rounded-md mx-5 mt-4 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">温度报警上限</label>
-                <input id="name" v-model="Content.TempAlarm" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
-        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入温度报警上限"
-                       type="text"/>
-            </div>
+                <div class="flex ">
+                    <input id="name"
+                           v-model="EditData.temperature_threshold" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6"
+                           disabled
+                           name="name"
+                           type="text"/>
+                    <input id="name" v-model="Content.TempAlarm" class="h-[50%] mx-2 w-[67%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标准值"
+                           type="text"/>
+                </div>
     
+            </div>
             <div
-                    class="rounded-md mx-5 mt-4 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">温度标定系数</label>
-                <input id="name" v-model="Content.TempCoefficent" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
-        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标定系数"
-                       type="text"/>
+                <div class="flex ">
+                    <input id="name"
+                           v-model="EditData.VibrationCoefficent" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6"
+                           disabled
+                           name="name"
+                           type="text"/>
+                    <input id="name" v-model="Content.TempCoefficent" class="h-[50%] mx-2 w-[67%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name" placeholder="请输入标准值"
+                           type="text"/>
+                </div>
+    
             </div>
+    
+    
             <div class=" mx-5 mt-5 h-[7%]   flex items-center justify-begin ">
                 <button class="btn btn-outline text-center btn-success w-[45%] shadow " @click.stop="confirm">确定
                 </button>
@@ -85,11 +133,13 @@
 import {computed, onMounted, reactive, ref, watch} from "vue";
 import {useDeviceManage} from "@/store/DeviceManage";
 import {useAppGlobal} from "@/store/AppGlobal";
+import {sendData} from "@/api";
 
 const DeviceManage = useDeviceManage();
 const AppGlobal = useAppGlobal()
 const extractedSensors = ref([]);
 const SensorList = ref([]);
+const EditData = ref([]);
 const Content = reactive({
     TempAlarm: null,
     VibrationAlarm: null,
@@ -105,9 +155,29 @@ const setZero = () => {
     Content.VibrationCoefficent = null;
     Content.TempCoefficent = null;
 }
-const confirm = () => {
-    Content.Coefficent = null;
-}
+const getSensorData = (index) => {
+    const i = Math.floor(index / 5);
+    const j = index % 5;
+    return DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[i][j].current_data;
+};
+
+const confirm = async () => {
+    for (let sensor of SensorList.value) {
+        if (sensor.select) {
+            const sensorData = getSensorData(sensor.id);  // 使用新的辅助函数
+            sensorData.vibration_threshold = Content.VibrationAlarm;
+            sensorData.temperature_threshold = Content.TempAlarm;
+            sensorData.VibrationCoefficent = Content.VibrationCoefficent;
+            sensorData.TempCoefficent = Content.TempCoefficent;
+            
+            await sendData(AppGlobal.pageChance, sensor.id, Content.VibrationAlarm, 'vibration_threshold');
+            await sendData(AppGlobal.pageChance, sensor.id, Content.TempAlarm, 'temperature_threshold');
+            await sendData(AppGlobal.pageChance, sensor.id, Content.VibrationCoefficent, 'vibration_coefficient');
+            await sendData(AppGlobal.pageChance, sensor.id, Content.TempCoefficent, 'temperature_coefficient');
+        }
+    }
+};
+
 const updateData = () => {
     extractedSensors.value = DeviceManage.deviceList[AppGlobal.pageChance]?.sensorsData?.flatMap(board => board) || [];
     SensorList.value = extractedSensors.value.map((sensor, index) => ({

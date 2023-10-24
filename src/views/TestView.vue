@@ -21,21 +21,16 @@ const numRegisters = 20;
 
 const fetchData = async () => {
     console.log("fetchData");
-    try {
-        await ping('192.168.0.2', 502, 1);
-        await ping('192.168.0.2', 502, 2);
-        
-        await ping('192.168.0.2', 502, 3);
-        await ping('192.168.0.2', 502, 4);
-        await ping('192.168.0.2', 502, 13);
-        await ping('192.168.0.2', 502, 14);
-        await ping('192.168.0.2', 502, 23);
-        await ping('192.168.0.2', 502, 24);
-        
-        
-    } catch (error) {
-        console.error("读取Modbus数据时发生错误:", error);
-    }
+    setInterval(async () => {
+        try {
+            await ping('192.168.0.3', 502, 1);
+            
+            
+        } catch (error) {
+            console.error("读取Modbus数据时发生错误:", error);
+        }
+    }, 1000)
+    
 };
 const ping = async (ip, port, id) => {
     

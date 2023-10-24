@@ -5,7 +5,7 @@
                     v-if="PopupMangerState.isShowPop"
                     class="rounded-2xl absolute bg-white bg-opacity-50 h-[calc(100%-2rem)] w-[calc(100%-2rem)]  z-30 backdrop-blur-sm items-center justify-center flex"
             >
-                <ChartsView class="w-full h-full "></ChartsView>
+                <ChartsView :deviceid="deviceid" class="w-full h-full "></ChartsView>
             </div>
         </transition>
         <div class="rounded-2xl bg-white w-[100%] h-[100%]  bottom-0  shadow p-4 overflow-auto ">
@@ -155,8 +155,10 @@ let data;
 
 
 /* ——————————————————————————定时器时间函数配置—————————————————————————— */
+const deviceid = ref()
 const popManager = async (device_id, substation_id, kind) => {
     console.log(device_id, substation_id)
+    deviceid.value = device_id
     await handleData(device_id, substation_id, kind)
     
 }

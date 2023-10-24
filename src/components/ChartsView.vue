@@ -1,14 +1,27 @@
 <template>
     <div :class="[AppGlobal.isDrawerState? 'w-[calc(94vw-15rem)]':'w-[94vw]']"
          class="transition-all duration-300 ease-in-out shadow bg-white rounded-2xl">
-        <div class="h-[10%] flex items-center bg-purple-500 w-full rounded-t-2xl">
-
+        <div class="h-[10%] flex items-center justify-center  w-full rounded-t-2xl border-b-2">
+            <div class="right-3 absolute top-3">
+                <svg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
+                    <rect fill="#F5F5F5" height="32" rx="16" width="32"/>
+                    <path d="M21 11.875L20.125 11L16 15.125L11.875 11L11 11.875L15.125 16L11 20.125L11.875 21L16 16.875L20.125 21L21 20.125L16.875 16L21 11.875Z"
+                          fill="#19161D"/>
+                </svg>
+            </div>
+            <div class=" font-bold text-3xl">
+                {{ Math.floor((props.deviceid - AppGlobal.pageChance * 30) / 5) + 1 }}号板设备{{
+                    props.deviceid - AppGlobal.pageChance * 30
+                }}-{{ PopupMangerState.kind }}传感器
+        
+            </div>
+    
+    
         </div>
         <div class=" h-[90%]   w-full">
             <div class="h-[10%] w-full">
                 <div>
                     <div class="sm:hidden">
-                        <label class="sr-only" for="tabs">Select a tab</label>
                         <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
                         <select id="tabs"
                                 class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
@@ -32,7 +45,7 @@
                         </nav>
                     </div>
                 </div>
-
+        
             </div>
             <div class="h-[90%]  flex items-center px-4  w-full">
                 <div :class="[AppGlobal.isDrawerState? 'w-[75%]':'w-[calc(75%-11.5rem)]']"
@@ -61,35 +74,54 @@
                      class=" h-[94%]  transition-all duration-300 ease-in-out  flex items-center justify-center">
                     <div :class="[AppGlobal.isDrawerState? 'w-[100%]':'w-[calc(100%-12rem)]']"
                          class=" h-full  transition-all duration-300 ease-in-out flex-col items-center justify-center ">
-                        <div class="w-[90%] bg-white rounded-md mx-5 mt-0 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
-                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
-                                   for="name">标定系数</label>
-                            <input id="name" v-model="SetData.calibrationCoefficient" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
-         hover:border-[#F7BF46] xl:text-xl xl:leading-6"
-                                   name="name" placeholder="请输入标定系数" type="text" @keydown.enter="EnterSave(1)"/>
-                        </div>
-                        <div class="w-[90%] bg-white rounded-md mx-5 mt-4 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
-                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
-                                   for="name">报警上限</label>
-                            <input id="name" v-model="SetData.alarmLimit" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
-        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name"
-                                   placeholder="请输入报警上限" type="text" @keydown.enter="EnterSave(2)"/>
-                        </div>
-
+        
+        
                         <div class="w-[90%] bg-white rounded-md mx-5 mt-4 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                             <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                                    for="name">标准值</label>
-                            <input id="name" v-model="SetData.standardValue" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+                            <input id="name" v-model="SetData.Standard" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
         hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name"
-                                   placeholder="请输入标准值" type="text" @keydown.enter="EnterSave(3)"/>
+                                   placeholder="请输入标准值" type="text" @keydown.enter="EnterSave(1)"/>
                         </div>
-
+                        <div v-if="PopupMangerState.kind==='温度'"
+                             class="w-[90%] bg-white rounded-md mx-5 mt-4  px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                                   for="name">温度标定系数</label>
+                            <input id="name" v-model="SetData.TempCoefficent" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+         hover:border-[#F7BF46] xl:text-xl xl:leading-6"
+                                   name="name" placeholder="请输入标定系数" type="text" @keydown.enter="EnterSave(2)"/>
+                        </div>
+                        <div v-if="PopupMangerState.kind==='温度'"
+                             class="w-[90%] bg-white rounded-md mx-5 mt-4 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                                   for="name">温度报警上限</label>
+                            <input id="name" v-model="SetData.TempAlarm" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name"
+                                   placeholder="请输入报警上限" type="text" @keydown.enter="EnterSave(3)"/>
+                        </div>
+                        <div v-if="PopupMangerState.kind==='振动'"
+                             class="w-[90%] bg-white rounded-md mx-5 mt-4 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                                   for="name">振动标定系数</label>
+                            <input id="name" v-model="SetData.VibrationCoefficent" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+         hover:border-[#F7BF46] xl:text-xl xl:leading-6"
+                                   name="name" placeholder="请输入标定系数" type="text" @keydown.enter="EnterSave(4)"/>
+                        </div>
+                        <div v-if="PopupMangerState.kind==='振动'"
+                             class="w-[90%] bg-white rounded-md mx-5 mt-4 px-3 h-[17%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                            <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
+                                   for="name">振动报警上限</label>
+                            <input id="name" v-model="SetData.VibrationAlarm" class="h-[50%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+        hover:border-[#F7BF46] xl:text-xl xl:leading-6" name="name"
+                                   placeholder="请输入报警上限" type="text" @keydown.enter="EnterSave(5)"/>
+                        </div>
+    
                     </div>
 
 
                 </div>
             </div>
-
+    
         </div>
 
 
@@ -105,17 +137,21 @@ import CepstrumView from "@/components/selectCharts/CepstrumView.vue";
 import FrequencyDomain from "@/components/selectCharts/FrequencyDomain.vue";
 import TimeWaveform from "@/components/selectCharts/TimeWaveform.vue";
 import WaterFall from "@/components/selectCharts/WaterFall.vue";
-import {reactive, ref} from "vue";
+import {defineProps, reactive, ref} from "vue";
 import {usePopupMangerState} from "@/store/PopupMangerState";
 
 const PopupMangerState = usePopupMangerState()
-
+const props = defineProps({
+    deviceid: Number
+});
 
 const SetData = reactive(
     {
-        calibrationCoefficient: 0,
-        alarmLimit: 0,
-        standardValue: 0
+        TempAlarm: 0,
+        VibrationAlarm: 0,
+        Standard: 0,
+        TempCoefficent: 0,
+        VibrationCoefficent: 0
     }
 )
 
@@ -138,7 +174,7 @@ const CepstrumChartId = ref(null);
 const BauLuChartId = ref(null);
 
 const updateSelectTabs = (id: any) => {
-
+    
     selectTabs.value = id
     PopupMangerState.selectTabs = id
 }
@@ -146,13 +182,17 @@ const updateSelectTabs = (id: any) => {
 
 const EnterSave = (id) => {
     if (id == 1) {
-        PopupMangerState.setData.calibration = SetData.calibrationCoefficient
+        PopupMangerState.setData.Standard = SetData.Standard
     } else if (id == 2) {
-        PopupMangerState.setData.alarmLimit = SetData.alarmLimit
+        PopupMangerState.setData.TempCoefficent = SetData.TempCoefficent
     } else if (id == 3) {
-        PopupMangerState.setData.Standard = SetData.standardValue
+        PopupMangerState.setData.TempAlarm = SetData.TempAlarm
+    } else if (id == 4) {
+        PopupMangerState.setData.VibrationCoefficent = SetData.VibrationCoefficent
+    } else if (id == 5) {
+        PopupMangerState.setData.VibrationAlarm = SetData.VibrationAlarm
     }
-
+    
 }
 
 

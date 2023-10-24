@@ -29,9 +29,11 @@ const state = () => {
         popupContent: PopupType.None,
         kind: '',
         setData: {
-            calibration: 0,
-            alarmLimit: 0,
+            TempAlarm: 0,
+            VibrationAlarm: 0,
             Standard: 0,
+            TempCoefficent: 0,
+            VibrationCoefficent: 0
         },
         // 是否打开弹窗
         isShowPop: false,

@@ -99,9 +99,10 @@ export const openDevice = async (index) => {
 const fetchDataFromModbus = async (ip, port, id, startAddress = 0, numRegisters = 20) => {
     try {
         const modbus = window.useModbusAPI.new(ip, port, id);
-        await modbus.connect();
+        await modbus.connect(ip, port, id);
+    
         const fetchedData = await modbus.readHoldingRegisters(startAddress, numRegisters);
-        console.log("fetchedData", fetchedData);
+        console.log("fetchedData", fetchedData, ip, port, id)
         modbus.close();
         console.log("close connection...");
         return fetchedData;
@@ -124,57 +125,50 @@ export const updateSubstationData = async (substationIndex) => {
             const calibrationData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, i + 9);
             if (calibrationData === null) {
                 calibrationCoefficients.push({
-                    temperature_coefficient: -1,
-                    vibration_coefficient: -1
+                    vibration_coefficient: -1,
+                    temperature_coefficient: -1
                 });
             } else {
                 calibrationCoefficients.push({
-                    temperature_coefficient: calibrationData[0],
-                    vibration_coefficient: calibrationData[1]
+                    vibration_coefficient: calibrationData[0],
+                    temperature_coefficient: calibrationData[1]
                 });
             }
-            
-            
             const thresholdData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, i + 19); // i+6 + 1 (因为i从0开始)
-            
             if (calibrationData === null) {
-                thresholdData.push({
+                alertThresholds.push({
                     temperature_coefficient: -1,
                     vibration_coefficient: -1
                 });
             } else {
-                thresholdData.push({
-                    temperature_threshold: thresholdData[0],
-                    vibration_threshold: thresholdData[1]
+                alertThresholds.push({
+                    temperature_threshold: thresholdData[1],
+                    vibration_threshold: thresholdData[0]
                 });
             }
         } catch (error) {
             console.error(`分站${substationIndex}从editSocket ${i + 1} 读取数据时发生错误:`, error);
         }
     }
-    
     // Iterate over each control board
     for (let boardIndex = 0; boardIndex < 6; boardIndex++) {
         try {
             let floatData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, boardIndex + 1);  // 加1是因为boardIndex从0开始
-            if (floatData === null) {
-                floatData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port, boardIndex + 1);  // 加1是因为boardIndex从0开始
-                
-            }
+
             // Update sensor data
             for (let sensorIndex = 0; sensorIndex < 5; sensorIndex++) {
-                const temperatureData = parseFloat(floatData[sensorIndex * 2].toFixed(2));
-                const vibrationData = parseFloat(floatData[sensorIndex * 2 + 1].toFixed(2));
-                
+                const vibrationData = parseFloat(floatData[sensorIndex * 2].toFixed(2));
+                const temperatureData = parseFloat(floatData[sensorIndex * 2 + 1].toFixed(2));
+    
                 // Update real-time data
                 deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_data = temperatureData;
                 deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_data = vibrationData;
                 deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold = alertThresholds[boardIndex].temperature_threshold === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold : alertThresholds[boardIndex].temperature_threshold;
                 deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold = alertThresholds[boardIndex].vibration_threshold === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold : alertThresholds[boardIndex].vibration_threshold;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent = calibrationCoefficients[boardIndex].temperature_coefficient !== -1 ? calibrationCoefficients[boardIndex].temperature_coefficient : deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent;
-                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent = calibrationCoefficients[boardIndex].vibration_coefficient !== -1 ? calibrationCoefficients[boardIndex].vibration_coefficient : deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent;
-                
-                
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent = calibrationCoefficients[boardIndex].temperature_coefficient === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent : calibrationCoefficients[boardIndex].temperature_coefficient;
+                deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent = calibrationCoefficients[boardIndex].vibration_coefficient === -1 ? deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent : calibrationCoefficients[boardIndex].vibration_coefficient;
+    
+    
                 // Check for threshold exceedances
                 const isTemperatureAlerted = temperatureData >= deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.temperature_threshold;
                 const isVibrationAlerted = vibrationData >= deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold;
@@ -206,37 +200,55 @@ export const updateSubstationData = async (substationIndex) => {
 
 
 // 数据发送
-export const sendData = (index, data) => {
+/**
+ * 发送分站某个传感器的数据。
+ * @substationIndex {Number} 这个是substationIndex是从0开始的，id是从1开始的 - 分站数据。
+ * @deviceId {Number} deviceId是从1开始的 - 分站数据。
+ * @data {Number} number数据 - 分站数据。
+ * @kind {String} 数据类型 - 分站数据。
+ */
+export const sendData = async (substationIndex, deviceId, data, kind) => {
+    console.log("sendData", substationIndex, deviceId, data, kind)
+    // 这个substationIndex是从0开始的，id是从1开始的
+    const deviceInfo = DeviceManage.deviceList[substationIndex];
+    let registerId, addressOffset;
     
-    //分包发送
-    if (DeviceManage.deviceList[index].nowData !== undefined && DeviceManage.deviceList[index].nowData !== null) {
+    // Determine the registerId and addressOffset based on deviceId
+    let boardIndex = Math.floor((deviceId - 1 - substationIndex * 30) / 5);
+    let sensorIndex = (deviceId - 1) % 5;
+    console.log("boardIndex", boardIndex, "sensorIndex", sensorIndex)
+    switch (kind) {
+        case 'temperature_coefficient':
+            registerId = 9 + boardIndex;
+            addressOffset = sensorIndex * 2;  // Because temperature comes before vibration
+            break;
+        case 'vibration_coefficient':
+            registerId = 9 + boardIndex;
+            addressOffset = sensorIndex * 2 + 1;  // Vibration comes after temperature
+            break;
+        case 'temperature_threshold':
+            registerId = 19 + boardIndex;
+            addressOffset = sensorIndex * 2;  // Because temperature comes before vibration
+            break;
+        case 'vibration_threshold':
+            registerId = 19 + boardIndex;
+            addressOffset = sensorIndex * 2 + 1;  // Vibration comes after temperature
+            break;
+        default:
+            console.error("Unknown kind:", kind);
+            return;
+    }
+    console.log("registerId", registerId, "addressOffset", addressOffset)
+    try {
+        const modbus = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port, registerId);
         
-        // 将对象的键拆分成每6个一组的数组
-        const chunks = Object.keys(data).reduce((result, key, chunkindex) => {
-            if (chunkindex % 6 === 0) result.push([]);
-            result[Math.floor(chunkindex / 6)].push(key);
-            return result;
-        }, []);
+        await modbus.connect(deviceInfo.ip, deviceInfo.port, registerId);
+        await modbus.updateRegisterByDataIndex(addressOffset, Number(data));
         
-        let chunkIndex = 0;
-        
-        const sendDataChunk = () => {
-            if (chunkIndex < chunks.length) {
-                const chunkData = {};
-                chunks[chunkIndex].forEach(key => {
-                    chunkData[key] = data[key];
-                });
-                // 发送当前分组的数据
-                console.log("发送数据", chunkData);
-                DeviceManage.deviceList[index].deviceSocket.send(JSON.stringify(chunkData));
-                chunkIndex++;
-            } else {
-                clearInterval(intervalId);  // 当所有分组都已发送时，清除间隔
-            }
-        };
-        
-        const intervalId = setInterval(sendDataChunk, 500);
-        
+        modbus.close();
+        console.log("Data sent and connection closed...");
+    } catch (error) {
+        console.error(`发送数据到 ${deviceInfo.ip}:${deviceInfo.port} ID ${registerId} 时发生错误:`, error);
     }
 }
 
