@@ -69,7 +69,9 @@ class ModbusInstance {
         try {
             const [high, low] = floatToUint16(newValue);
             console.log("updateRegisterByDataIndex", address, high, low)
-            await this.writeRegisters(address, [high, low]);
+            await this.writeRegisters(address, [high]);
+            await this.writeRegisters(address + 1, [low]);
+    
         } catch (error) {
             console.error("Failed to update register:", error, dataIndex, newValue, address);
         }
@@ -84,13 +86,14 @@ class ModbusInstance {
                     for (let i = 0; i < data.data.length; i += 2) {
                         floatData.push(convertToFloat32(data.data[i], data.data[i + 1]));
                     }
+    
                     resolve(floatData);
-
+    
                 })
                 .catch(reject);
         });
     }
-
+    
     close() {
         this.client.close();
     }
@@ -110,4 +113,9 @@ function floatToUint16(value) {
     view.setFloat32(0, value, false);
     return [view.getUint16(0, false) & 0xFFFF, view.getUint16(2, false) & 0xFFFF];
 }
+
+// ... [其他代码]
+
+
+// ... [其他代码]
 

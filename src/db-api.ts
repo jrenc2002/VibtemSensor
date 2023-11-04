@@ -6,7 +6,7 @@ import sqlite3Lib from 'sqlite3';
 const sqlite3 = sqlite3Lib.verbose();
 const dbPath = path.join(__dirname, '../src/database.db');
 const db = new sqlite3.Database(dbPath);
-// todo 数据库每创建一个分站默认创建多少个传感器数据项。
+// TODO 读取数据给予限制，不要让他一下子读取太多数据
 export function createInitDB(): any {
     ipcMain.handle('init-db', async (event: IpcMainInvokeEvent) => {
         console.log("Database path:", dbPath);

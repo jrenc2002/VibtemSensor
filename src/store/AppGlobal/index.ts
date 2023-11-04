@@ -14,7 +14,7 @@ const state = () => {
         selectedDeviceIndex: -1,
         // 侧边展开
         isDrawerState: true,
-        limitDivceNum: 9,
+    
     }
 }
 

@@ -16,7 +16,7 @@
                     <button v-for="machine in machines" :key="machine.id"
                             :class="machine.select?'border-[#F7BF46]':'border-gray-300'" class="relative flex items-center  rounded-lg border
                     bg-white shadow-sm h-20  hover:border-[#F7BF46]"
-                            @click="machine.select=!machine.select;EditData=DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor(machine.id / 5)][machine.id % 5].current_data;">
+                            @click="machine.select=!machine.select;EditData=DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((machine.id-1) / 5)][(machine.id-1) % 5].current_data;console.log(machine.id);console.log(Math.floor((machine.id-1) / 5),(machine.id-1) % 5)">
                         <div class="min-w-0 flex-1 ">
                             <h5 class="text-xl font-none leading-6 text-gray-900 px-3">{{ machine.name }}</h5>
                         </div>
@@ -53,7 +53,7 @@
                        for="name">振动报警上限</label>
                 <div class="flex ">
                     <input id="name"
-                           v-model="EditData.vibration_data" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+                           v-model="EditData.vibration_threshold" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
         hover:border-[#F7BF46] xl:text-xl xl:leading-6"
                            disabled
                            name="name"
@@ -70,7 +70,7 @@
                        for="name">振动标定系数</label>
                 <div class="flex ">
                     <input id="name"
-                           v-model="EditData.vibration_threshold" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+                           v-model="EditData.VibrationCoefficent" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
         hover:border-[#F7BF46] xl:text-xl xl:leading-6"
                            disabled
                            name="name"
@@ -104,7 +104,7 @@
                        for="name">温度标定系数</label>
                 <div class="flex ">
                     <input id="name"
-                           v-model="EditData.VibrationCoefficent" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
+                           v-model="EditData.TempCoefficent" class=" input input-bordered h-[50%]  w-[30%] block w-full rounded-md border p-3 text-gray-900  placeholder:text-gray-400 focus:border-[#F7BF46]
         hover:border-[#F7BF46] xl:text-xl xl:leading-6"
                            disabled
                            name="name"
@@ -169,11 +169,22 @@ const confirm = async () => {
             sensorData.temperature_threshold = Content.TempAlarm;
             sensorData.VibrationCoefficent = Content.VibrationCoefficent;
             sensorData.TempCoefficent = Content.TempCoefficent;
-            
-            await sendData(AppGlobal.pageChance, sensor.id, Content.VibrationAlarm, 'vibration_threshold');
-            await sendData(AppGlobal.pageChance, sensor.id, Content.TempAlarm, 'temperature_threshold');
-            await sendData(AppGlobal.pageChance, sensor.id, Content.VibrationCoefficent, 'vibration_coefficient');
-            await sendData(AppGlobal.pageChance, sensor.id, Content.TempCoefficent, 'temperature_coefficient');
+            // if (Content.Standard) {
+            //     // sensorData.standard = Content.Standard;
+            // }
+            if (Content.VibrationAlarm) {
+                await sendData(AppGlobal.pageChance, sensor.id, Content.VibrationAlarm, 'vibration_threshold');
+            }
+            if (Content.TempAlarm) {
+                await sendData(AppGlobal.pageChance, sensor.id, Content.TempAlarm, 'temperature_threshold');
+            }
+            if (Content.VibrationCoefficent) {
+                await sendData(AppGlobal.pageChance, sensor.id, Content.VibrationCoefficent, 'vibration_coefficient');
+            }
+            if (Content.TempCoefficent) {
+                await sendData(AppGlobal.pageChance, sensor.id, Content.TempCoefficent, 'temperature_coefficient');
+            }
+    
         }
     }
 };

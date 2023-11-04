@@ -3,12 +3,7 @@ import {useAppGlobal} from '@/store/AppGlobal'
 // 给开发人员使用的debug
 const debug = false;
 const AppGlobal = useAppGlobal()
-interface SetData {
-    // PH控制部分变量
-    vibration_value: number;         // 振动值
-    temp_value: number;              // 温度值
 
-}
 
 interface Device {
     id: number;
@@ -19,15 +14,13 @@ interface Device {
     alarm: boolean;
     sensorsData: any[];
     status: number;
-    is_alerted: boolean
+    is_alerted: boolean;
+    socket: any,
     
     
 }
 
-// TODO:设备管理要重构
-// 1.内容数据表项不全仍然缺乏
-// 2.各个部分的状态灯
-// 3.报警数据
+
 
 const state = (): {
     deviceList: Device[];
@@ -44,9 +37,7 @@ export const useDeviceManage = defineStore('DeviceManage', {
     state,
     actions: {
         async addDevice(ip: string, port: number, nameDevice: string) {
-            if (this.deviceList.length > AppGlobal.limitDivceNum) {
-                return -1;
-            }
+
             const newId = this.deviceList.length;
             const newDevice: Device = {
                 id: newId,
@@ -55,6 +46,7 @@ export const useDeviceManage = defineStore('DeviceManage', {
                 ip: ip,
                 port: port,
                 alarm: false,
+                socket: null,
                 sensorsData: Array(6).fill([]),  // 初始化为6个空数组，代表6个控制板
                 status: 0,
                 is_alerted: false
@@ -118,9 +110,7 @@ export const useDeviceManage = defineStore('DeviceManage', {
     
             if (res) {
                 for (const item of res) {
-                    if (newDeviceList.length > AppGlobal.limitDivceNum) {
-                        break;  // 当超过设备限制时，停止处理
-                    }
+    
                     if (item.substation_id && item.substation_ip && item.substation_port && item.substation_name) {
                         const newId = newDeviceList.length;  // 使用新列表的长度作为ID
                 
@@ -132,6 +122,7 @@ export const useDeviceManage = defineStore('DeviceManage', {
                             port: item.substation_port,
                             alarm: false,
                             status: 0,
+                            socket: null,
                             sensorsData: Array(6).fill([]),  // 初始化为6个空数组，代表6个控制板
                             is_alerted: false
                         };

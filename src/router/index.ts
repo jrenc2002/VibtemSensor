@@ -50,15 +50,7 @@ const routes: Array<RouteRecordRaw> = [
                 },
                 component: () => import(/* webpackChunkName: "login" */ '../views/AlarmView.vue'),
             },
-            {
-                path: '/testview',
-                name: 'TestView',
-                meta: {
-                    title: '测试页面',
-                    permiss: '1',
-                },
-                component: () => import(/* webpackChunkName: "login" */ '../views/TestView.vue'),
-            },
+
 
         ]
     },

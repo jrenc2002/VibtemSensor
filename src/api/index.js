@@ -37,7 +37,7 @@ const DeviceManage = useDeviceManage();
 
 
 // 对设备管理器初始化-添加外部监听
-
+// TODO 将其数据读取改为socket存储，放置阻塞冲突。
 
 // 添加设备-对
 export const addDevice = async (ip, port, name) => {
@@ -96,21 +96,29 @@ export const openDevice = async (index) => {
  *
  * @param {Object} substation - 分站数据。
  */
-const fetchDataFromModbus = async (ip, port, startAddress = 0, numRegisters = 360) => {
+const fetchDataFromModbus = async (ip, port) => {
     try {
         const modbus = window.useModbusAPI.new(ip, port);
         await modbus.connect(ip, port);
         
-        const fetchedData = await modbus.readHoldingRegisters(startAddress, numRegisters);
-        console.log("fetchedData", fetchedData, ip, port)
+        const allData = [];
+        
+        for (let i = 0; i < 3; i++) {
+            const startAddress = i * 120;
+            const fetchedData = await modbus.readHoldingRegisters(startAddress, 120);
+            allData.push(...fetchedData);
+        }
+        
+        console.log("fetchedData", allData, ip, port);
         modbus.close();
         console.log("close connection...");
-        return fetchedData;
+        return allData;
     } catch (error) {
         console.error(`从 ${ip}:${port} 读取数据时发生错误:`, error);
         return null;
     }
 };
+
 
 export const updateSubstationData = async (substationIndex) => {
     const deviceInfo = DeviceManage.deviceList[substationIndex];
@@ -148,7 +156,6 @@ export const updateSubstationData = async (substationIndex) => {
             deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.vibration_threshold = vibrationThreshold;
             deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.TempCoefficent = temperatureCoefficient;
             deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.VibrationCoefficent = vibrationCoefficient;
-            
             // Check for threshold exceedances
             const isTemperatureAlerted = temperatureData >= temperatureThreshold;
             const isVibrationAlerted = vibrationData >= vibrationThreshold;
@@ -191,25 +198,25 @@ export const sendData = async (substationIndex, deviceId, data, kind) => {
     let addressOffset;
     
     // Determine the addressOffset based on deviceId
-    let boardIndex = Math.floor((deviceId - 1 - substationIndex * 30) / 5);
+    let boardIndex = Math.floor((deviceId - 1) / 5);
     let sensorIndex = (deviceId - 1) % 5;
     console.log("boardIndex", boardIndex, "sensorIndex", sensorIndex)
     
     let baseAddress;
     switch (kind) {
-        case 'temperature_coefficient':
+        case 'vibration_coefficient':
             baseAddress = 60; // Starting point for coefficients
             addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2;
             break;
-        case 'vibration_coefficient':
+        case 'temperature_coefficient':
             baseAddress = 60; // Starting point for coefficients
             addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2 + 1;
             break;
-        case 'temperature_threshold':
+        case 'vibration_threshold':
             baseAddress = 120; // Starting point for thresholds
             addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2;
             break;
-        case 'vibration_threshold':
+        case 'temperature_threshold':
             baseAddress = 120; // Starting point for thresholds
             addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2 + 1;
             break;
@@ -222,10 +229,11 @@ export const sendData = async (substationIndex, deviceId, data, kind) => {
     
     try {
         const modbus = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port);
-        
+    
         await modbus.connect(deviceInfo.ip, deviceInfo.port);
+        console.log(addressOffset, Number(data))
         await modbus.updateRegisterByDataIndex(addressOffset, Number(data));
-        
+    
         modbus.close();
         console.log("Data sent and connection closed...");
     } catch (error) {

@@ -2,7 +2,7 @@
     <div :class="[AppGlobal.isDrawerState? 'w-[calc(94vw-15rem)]':'w-[94vw]']"
          class="transition-all duration-300 ease-in-out shadow bg-white rounded-2xl">
         <div class="h-[10%] flex items-center justify-center  w-full rounded-t-2xl border-b-2">
-            <div class="right-3 absolute top-3">
+            <div class="right-3 absolute top-3 cursor-pointer" @click.stop="closePop()">
                 <svg fill="none" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg">
                     <rect fill="#F5F5F5" height="32" rx="16" width="32"/>
                     <path d="M21 11.875L20.125 11L16 15.125L11.875 11L11 11.875L15.125 16L11 20.125L11.875 21L16 16.875L20.125 21L21 20.125L16.875 16L21 11.875Z"
@@ -139,6 +139,7 @@ import TimeWaveform from "@/components/selectCharts/TimeWaveform.vue";
 import WaterFall from "@/components/selectCharts/WaterFall.vue";
 import {defineProps, reactive, ref} from "vue";
 import {usePopupMangerState} from "@/store/PopupMangerState";
+import {sendData} from "@/api";
 
 const PopupMangerState = usePopupMangerState()
 const props = defineProps({
@@ -180,21 +181,29 @@ const updateSelectTabs = (id: any) => {
 }
 
 
-const EnterSave = (id) => {
+const EnterSave = async (id) => {
     if (id == 1) {
         PopupMangerState.setData.Standard = SetData.Standard
     } else if (id == 2) {
         PopupMangerState.setData.TempCoefficent = SetData.TempCoefficent
+        await sendData(AppGlobal.pageChance, props.deviceid, SetData.TempCoefficent, 'temperature_coefficient');
+        
     } else if (id == 3) {
         PopupMangerState.setData.TempAlarm = SetData.TempAlarm
+        await sendData(AppGlobal.pageChance, props.deviceid, SetData.TempAlarm, 'temperature_threshold');
+        
     } else if (id == 4) {
         PopupMangerState.setData.VibrationCoefficent = SetData.VibrationCoefficent
+        await sendData(AppGlobal.pageChance, props.deviceid, SetData.VibrationCoefficent, 'vibration_coefficient');
     } else if (id == 5) {
         PopupMangerState.setData.VibrationAlarm = SetData.VibrationAlarm
+        await sendData(AppGlobal.pageChance, props.deviceid, SetData.VibrationAlarm, 'vibration_threshold');
     }
     
 }
-
+const closePop = () => {
+    PopupMangerState.updateIsShowPop(false)
+}
 
 </script>
 <style lang="scss" scoped></style>

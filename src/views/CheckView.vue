@@ -201,7 +201,7 @@ import {onMounted, reactive, ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {CheckCircleIcon, XCircleIcon, XMarkIcon} from '@heroicons/vue/20/solid'
 // import { UserLogin } from "../api/index";
-
+// TODO 放置清除缓存的时候，清除登录状态
 // 这里定义了一个响应式的对象 param，它有两个属性 publicKey 和 password，它们的默认值分别为 'admin' 和 '123123'。这个对象会在组件中被用于双向绑定和表单验证。
 const router = useRouter();
 const param = reactive({
