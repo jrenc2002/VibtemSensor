@@ -197,11 +197,11 @@
 
 <script lang="js" setup>
 import {onMounted, reactive, ref} from 'vue';
-
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import {useRouter} from 'vue-router';
+import {ec} from 'elliptic';
 import {CheckCircleIcon, XCircleIcon, XMarkIcon} from '@heroicons/vue/20/solid'
 // import { UserLogin } from "../api/index";
-// TODO 放置清除缓存的时候，清除登录状态
 // 这里定义了一个响应式的对象 param，它有两个属性 publicKey 和 password，它们的默认值分别为 'admin' 和 '123123'。这个对象会在组件中被用于双向绑定和表单验证。
 const router = useRouter();
 const param = reactive({
@@ -217,10 +217,7 @@ const submitForm = async () => {
     if (await CheckKey(param.publicKey)) {
         loginStatus.value = 'success';
         localStorage.setItem('publicKey', param.publicKey);
-
-
         // 只有当复选框被选中时，才保存激活码
-
         localStorage.setItem('password', param.password);
         localStorage.setItem('rememberPassword', JSON.stringify(rememberPassword.value));
 
@@ -235,22 +232,23 @@ const submitForm = async () => {
     }
 }
 // 当组件加载时，检查localStorage中是否有用户名和激活码，如果有则自动填充
-onMounted(() => {
-
+onMounted(async () => {
+    
     const remember = localStorage.getItem('rememberPassword');
     rememberPassword.value = remember ? JSON.parse(remember) : false;
-    let storedpublicKey = localStorage.getItem('publicKey') || generateRandomIdentifier();
+    let storedpublicKey = localStorage.getItem('publicKey') || await generateFingerprintIdentifier();
     const storedPassword = localStorage.getItem('password');
-
+    // 使用 fingerprintjs 生成浏览器的指纹
+    console.log(storedpublicKey)
     if (isValidIdentifier(storedpublicKey)) {
         // 检验成功
         param.publicKey = storedpublicKey;
         localStorage.setItem('publicKey', param.publicKey);
     } else {
-        param.publicKey = generateRandomIdentifier();
+        param.publicKey = await generateFingerprintIdentifier();
         localStorage.setItem('publicKey', param.publicKey);
     }
-
+    
     if (remember && storedpublicKey && storedPassword) {
         // 只有当复选框被选中时，才自动填充激活码
         param.publicKey = storedpublicKey;
@@ -267,14 +265,13 @@ function isValidIdentifier(identifier) {
 
 // 关闭弹窗的函数
 const close = () => {
-    console.log(loginStatus.value);
     loginStatus.value = '';
 }
 
 const copyToClipboard = () => {
 
     navigator.clipboard.writeText(param.publicKey).then(() => {
-
+    
         loginStatus.value = 'copysuccess';
         setTimeout(() => {
             loginStatus.value = '';
@@ -285,13 +282,31 @@ const copyToClipboard = () => {
 };
 // 记录登录状态
 const loginStatus = ref('') // 登录状态，可以是 'success', 'failure', 或者 '' (空字符串)
-function generateRandomIdentifier() {
-    // 获取一个Uint32的随机数组
-    let randomValues = new Uint32Array(4);
-    window.crypto.getRandomValues(randomValues);
-    // 转换为16进制字符串
-    return Array.from(randomValues).map(val => val.toString(16)).join('-');
+const curve = new ec('secp256k1');
+
+async function generateFingerprintIdentifier() {
+    // 初始化并获取指纹信息
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
+    const fingerprint = result.visitorId;
+    
+    // 使用SHA-256为浏览器指纹生成哈希
+    const encoder = new TextEncoder();
+    const data = encoder.encode(fingerprint);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    // 使用哈希作为种子生成私钥
+    const privateKey = curve.keyFromPrivate(hashHex);
+    
+    // 从私钥派生公钥
+    const publicKey = privateKey.getPublic(true, 'hex');
+    
+    
+    return publicKey;
 }
+
 
 const Privatekey = "MIIEpAIBAAKCAQEA15gUinYWEYh9TyDBn+RRc1UAjMstdaUFrxvendk197ih1tnX\n" +
     "ip57U/B6A1o4BgIN5AihwIxLGlDDgzEbRq8Nsl0yENcPt0Q9MT59cdFy6jk+/v2u\n" +
@@ -340,7 +355,7 @@ async function encryptWithKey(data, key) {
     const encodedData = enc.encode(data);
     const encryptedData = await window.crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, key, encodedData);
     const encryptedString = uint8ArrayToBase64(new Uint8Array(encryptedData));
-    console.log(encryptedString)
+    // console.log(encryptedString) //是否显示密码
     return {iv: iv, data: encryptedString};
 }
 
@@ -359,7 +374,6 @@ function uint8ArrayToBase64(buffer) {
 async function CheckKey(randomData) {
     const key = await deriveKeyFromPassword(Privatekey);
     const encrypted = await encryptWithKey(randomData, key);
-    console.log(encrypted.data)
     return param.password === encrypted.data;
 }
 

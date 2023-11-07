@@ -163,15 +163,15 @@ const popManager = async (device_id, substation_id, kind) => {
     
 }
 const handleData = async (device_id, substation_id, kind) => {
-    await window.Electron.ipcRenderer.invoke('get-data-item-by-substation-and-device', substation_id, device_id)
+    await window.Electron.ipcRenderer.invoke('get-data-item-by-substation-and-device-last', substation_id, device_id)
         .then((res) => {
             try {
-                
+            
                 // 先确保res是有效的数组
                 if (!Array.isArray(res)) {
                     throw new Error("Received data is not an array");
                 }
-                
+            
                 // 这里将原始数据转换为需要的格式
                 let data;
                 if (kind === '振动') {

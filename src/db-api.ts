@@ -1,12 +1,14 @@
 import {ipcMain, IpcMainInvokeEvent} from 'electron';
-import path from 'path';
 import sqlite3Lib from 'sqlite3';
+
+const path = require('path');
 
 // 为了避免 ESLint 的 'no-var-requires' 错误，我们这样导入 sqlite3
 const sqlite3 = sqlite3Lib.verbose();
 const dbPath = path.join(__dirname, '../src/database.db');
+console.log(dbPath)
 const db = new sqlite3.Database(dbPath);
-// TODO 读取数据给予限制，不要让他一下子读取太多数据
+
 export function createInitDB(): any {
     ipcMain.handle('init-db', async (event: IpcMainInvokeEvent) => {
         console.log("Database path:", dbPath);
@@ -286,7 +288,47 @@ export function createInitDB(): any {
             throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
         }
     });
-
-
+    
+    // 根据分站ID和传感器设备ID获取所有未被隐藏相关数据项的最后3w条
+    ipcMain.handle('get-data-item-by-substation-and-device-last', async (event: IpcMainInvokeEvent, substationId: number, deviceId: number) => {
+        try {
+            return new Promise((resolve, reject) => {
+                // 检查传感器设备是否属于这个分站
+                const checkQuery = 'SELECT * FROM sensor_device WHERE substation_id = ? AND device_id = ?';
+                db.all(checkQuery, [substationId, deviceId], (checkErr, deviceRows) => {
+                    if (checkErr) {
+                        console.error("Error checking if the device belongs to the substation:", checkErr);
+                        reject(checkErr);
+                        return;
+                    }
+                    
+                    if (deviceRows.length === 0) {
+                        reject(new Error("The device doesn't belong to the provided substation or doesn't exist."));
+                        return;
+                    }
+                    
+                    // 如果传感器设备确实属于这个分站，获取所有未被隐藏的数据项的最后3w条
+                    const query = `
+                SELECT * FROM data_item
+                WHERE device_id = ? AND is_hidden = 0
+                ORDER BY timestamp DESC
+                LIMIT 32768
+                `;
+                    db.all(query, [deviceId], (err, rows) => {
+                        if (err) {
+                            console.error("Error fetching last 30k data items by device ID:", err);
+                            reject(err);
+                        } else {
+                            resolve(rows.reverse());  // 这里再次将结果反转，以保持时间的升序排序
+                        }
+                    });
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in get-data-item-by-substation-and-device:", error);
+            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
+        }
+    });
+    
 }
 

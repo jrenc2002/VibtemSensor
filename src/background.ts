@@ -14,12 +14,11 @@ import {createInitDB} from './db-api'
 const path = require('path');
 // 判断当前是否是开发模式
 const isDevelopment = process.env.NODE_ENV !== 'production'
-
 // 注册 app 协议，必须在 app ready 之前完成
 protocol.registerSchemesAsPrivileged([
   {scheme: 'app', privileges: {secure: true, standard: true}}
 ])
-
+console.log(__dirname, path.join(__dirname, 'preload.js'))
 // 创建 Electron 窗口的异步函数
 async function createWindow() {
   // 创建一个新的浏览器窗口
@@ -29,10 +28,13 @@ async function createWindow() {
     webPreferences: {
       // 使用 pluginOptions.nodeIntegration，不要修改
       // 更多信息请查看 nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration
-      preload: path.join(__dirname, '../src/preload.js'),
-      nodeIntegration: (process.env.ELECTRON_NODE_INTEGRATION as unknown) as boolean,
-
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+  
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: ((process.env
+          .ELECTRON_NODE_INTEGRATION as unknown) as boolean as unknown) as boolean,
+  
+      contextIsolation: !(process.env
+          .ELECTRON_NODE_INTEGRATION as unknown) as boolean
     }
   })
 

@@ -19,17 +19,17 @@
                                   class="flex bg-[#DAF0E4]  cursor-pointer p-3 m-2 rounded-md  justify-center items-center gap-8
               text-[15px]"
                             >
-                                
-                                <el-text class="text-[#295C3F]">
+    
+                                <div class="text-[#295C3F]">
                                     {{ item.device_id }}
-                                </el-text>
-                                <el-text class="text-[#79930F]">
+                                </div>
+                                <div class="text-[#79930F]">
                                     {{ item.device_name }}
-                                </el-text>
-                                <el-text class="text-[#1A3A8D]">
+                                </div>
+                                <div class="text-[#1A3A8D]">
                                     {{ item.substation_id }}
-                                </el-text>
-                            
+                                </div>
+
                             </view>
                         
                         </li>
@@ -53,7 +53,7 @@
                             </div>
                             <div class="form-control top-8 absolute w-full ">
                                 <label class="label cursor-pointer flex justify-center items-center ">
-                                    <span class="label-text pr-3">报警数据</span>
+                                    <span class="label-link pr-3">报警数据</span>
                                     <input v-model="alarm" checked class="toggle toggle-error" type="checkbox"/>
                                 </label>
                             </div>

@@ -114,7 +114,7 @@ const getAllData = () => {
         // 使用Promise.all确保所有分站数据同时异步更新
         const updatePromises = DeviceManage.deviceList.map(async (substation) => {
             try {
-                if (substation.status !== 0) {
+                if (substation.socket !== null) {
                     console.log(DeviceManage.deviceList);
                     await updateSubstationData(substation.id);
                 }

@@ -13,7 +13,6 @@ interface Device {
     port: number; // 这意味着 port 是可选的
     alarm: boolean;
     sensorsData: any[];
-    status: number;
     is_alerted: boolean;
     socket: any,
     
@@ -48,7 +47,6 @@ export const useDeviceManage = defineStore('DeviceManage', {
                 alarm: false,
                 socket: null,
                 sensorsData: Array(6).fill([]),  // 初始化为6个空数组，代表6个控制板
-                status: 0,
                 is_alerted: false
             };
         
@@ -121,7 +119,6 @@ export const useDeviceManage = defineStore('DeviceManage', {
                             ip: item.substation_ip,
                             port: item.substation_port,
                             alarm: false,
-                            status: 0,
                             socket: null,
                             sensorsData: Array(6).fill([]),  // 初始化为6个空数组，代表6个控制板
                             is_alerted: false

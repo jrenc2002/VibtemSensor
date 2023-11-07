@@ -302,10 +302,6 @@ module.exports = {
             DEFAULT: '1',
         },
         fontFamily: {
-            bt: ['ibt'],
-            wz: ['iwz'],
-
-
             sans: [
                 'ui-sans-serif',
                 'system-ui',

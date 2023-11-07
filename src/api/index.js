@@ -54,11 +54,31 @@ export const addDevice = async (ip, port, name) => {
         console.error(`添加设备失败: ${ip}:${port}`);
         return;
     }
-    
-    
-    DeviceManage.deviceList[index].status = 1;
-    
-    
+    const deviceInfo = DeviceManage.deviceList[index];
+    deviceInfo.socket = null;
+    try {
+        // 使用Promise.all进行并行连接
+        const deviceSocket = window.useModbusAPI.new(ip, port);
+        const device = await deviceSocket.connect(ip, port);
+        
+        device.on('connect', () => {
+            deviceInfo.sockets = device;
+            console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接成功`);
+        });
+        
+        device.on('error', (err) => {
+            deviceInfo.sockets = null;
+            console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接失败，错误信息:`, err);
+        });
+        
+        device.on('disconnect', () => {
+            deviceInfo.sockets = null;
+            console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接断开`);
+        });
+        
+    } catch (error) {
+        console.error("设备连接中发生错误：", error);
+    }
 }
 
 
@@ -70,9 +90,15 @@ export const closeDevice = async (index) => {
         return;
     }
     
-    
-    DeviceManage.deviceList[index].status = 0;
-    
+    const deviceInfo = DeviceManage.deviceList[index];
+    try {
+        if (deviceInfo.socket) {
+            await deviceInfo.socket.close();
+            console.log(`设备 ${index} 的${deviceInfo.name} 连接已成功关闭`);
+        }
+    } catch (error) {
+        console.error(`关闭设备 ${index} 的${deviceInfo.name}  连接时出错:`, error);
+    }
     
     
 }
@@ -85,8 +111,30 @@ export const openDevice = async (index) => {
         return;
     }
     
-    DeviceManage.deviceList[index].status = 1;
-    
+    const deviceInfo = DeviceManage.deviceList[index];
+    try {
+        // 使用Promise.all进行并行连接
+        const deviceSocket = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port);
+        const device = await deviceSocket.connect();
+        
+        device.on('connect', () => {
+            deviceInfo.sockets = device;
+            console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接成功`);
+        });
+        
+        device.on('error', (err) => {
+            deviceInfo.sockets = null;
+            console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接失败，错误信息:`, err);
+        });
+        
+        device.on('disconnect', () => {
+            deviceInfo.sockets = null;
+            console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接断开`);
+        });
+        
+    } catch (error) {
+        console.error("设备连接中发生错误：", error);
+    }
     
 }
 
@@ -96,25 +144,21 @@ export const openDevice = async (index) => {
  *
  * @param {Object} substation - 分站数据。
  */
-const fetchDataFromModbus = async (ip, port) => {
+const fetchDataFromModbus = async (socket, substationIndex) => {
     try {
-        const modbus = window.useModbusAPI.new(ip, port);
-        await modbus.connect(ip, port);
+        
         
         const allData = [];
         
         for (let i = 0; i < 3; i++) {
             const startAddress = i * 120;
-            const fetchedData = await modbus.readHoldingRegisters(startAddress, 120);
+            const fetchedData = await socket.readHoldingRegisters(startAddress, 120);
             allData.push(...fetchedData);
         }
         
-        console.log("fetchedData", allData, ip, port);
-        modbus.close();
-        console.log("close connection...");
         return allData;
     } catch (error) {
-        console.error(`从 ${ip}:${port} 读取数据时发生错误:`, error);
+        console.error(`从分站${substationIndex} 读取数据时发生错误:`, error);
         return null;
     }
 };
@@ -122,8 +166,11 @@ const fetchDataFromModbus = async (ip, port) => {
 
 export const updateSubstationData = async (substationIndex) => {
     const deviceInfo = DeviceManage.deviceList[substationIndex];
-    
-    const allData = await fetchDataFromModbus(deviceInfo.ip, deviceInfo.port);
+    if (!deviceInfo) {
+        console.error(`分站${substationIndex}读取数据时发生错误: 无数据返回`);
+        return;
+    }
+    const allData = await fetchDataFromModbus(deviceInfo.socket, substationIndex);
     
     if (!allData) {
         console.error(`分站${substationIndex}读取数据时发生错误: 无数据返回`);
@@ -195,6 +242,12 @@ export const sendData = async (substationIndex, deviceId, data, kind) => {
     console.log("sendData", substationIndex, deviceId, data, kind)
     // 这个substationIndex是从0开始的，id是从1开始的
     const deviceInfo = DeviceManage.deviceList[substationIndex];
+    if (deviceInfo.socket === null) {
+        console.error(`分站${substationIndex}发送数据时发生错误:未连接`);
+        return;
+    }
+    
+    
     let addressOffset;
     
     // Determine the addressOffset based on deviceId
@@ -227,18 +280,17 @@ export const sendData = async (substationIndex, deviceId, data, kind) => {
     
     console.log("addressOffset", addressOffset)
     
-    try {
-        const modbus = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port);
     
-        await modbus.connect(deviceInfo.ip, deviceInfo.port);
+    try {
+        const modbus = deviceInfo.socket;
         console.log(addressOffset, Number(data))
         await modbus.updateRegisterByDataIndex(addressOffset, Number(data));
-    
-        modbus.close();
+        
         console.log("Data sent and connection closed...");
     } catch (error) {
         console.error(`发送数据到 ${deviceInfo.ip}:${deviceInfo.port} addressOffset ${addressOffset} 时发生错误:`, error);
     }
+    
 }
 
 
