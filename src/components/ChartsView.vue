@@ -10,10 +10,10 @@
                 </svg>
             </div>
             <div class=" font-bold text-3xl">
-                {{ Math.floor((props.deviceid - AppGlobal.pageChance * 30) / 5) + 1 }}号板设备{{
-                    props.deviceid - AppGlobal.pageChance * 30
+                {{
+                    DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((props.deviceid - AppGlobal.pageChance * 30) / 5)][props.deviceid - AppGlobal.pageChance * 30 - 1].device_name
                 }}-{{ PopupMangerState.kind }}传感器
-        
+
             </div>
     
     
@@ -140,7 +140,9 @@ import WaterFall from "@/components/selectCharts/WaterFall.vue";
 import {defineProps, reactive, ref} from "vue";
 import {usePopupMangerState} from "@/store/PopupMangerState";
 import {sendData} from "@/api";
+import {useDeviceManage} from "@/store/DeviceManage";
 
+const DeviceManage = useDeviceManage();
 const PopupMangerState = usePopupMangerState()
 const props = defineProps({
     deviceid: Number

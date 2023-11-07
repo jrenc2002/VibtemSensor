@@ -153,7 +153,7 @@ const InitSensorsData = async () => {
                 const substationId = item.substation_id;
                 try {
                     const sensors = await window.Electron.ipcRenderer.invoke('get-all-sensors-by-substation', substationId);
-                    
+                    console.log(substationId)
                     const organizedSensorsData = [];
                     for (let i = 0; i < 6; i++) {
                         const controlBoardSensors = sensors.slice(i * 5, (i + 1) * 5).map(sensor => ({

@@ -288,6 +288,31 @@ export function createInitDB(): any {
             throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
         }
     });
+    // 根据分站ID和传感器设备ID更改传感器名称
+    ipcMain.handle('change-sensor-name', async (event, substationId, deviceId, newName) => {
+        try {
+            return new Promise((resolve, reject) => {
+                const query = `
+                UPDATE sensor_device
+                SET device_name = ?
+                WHERE substation_id = ?
+                AND device_id = ?;
+            `;
+                db.run(query, [newName, substationId, deviceId], function (err) {
+                    if (err) {
+                        console.error("Error changing sensor name:", err);
+                        reject(err);
+                    } else {
+                        resolve("传感器名称更新成功");
+                    }
+                });
+            });
+        } catch (error) {
+            console.error("Unexpected error in change-sensor-name:", error);
+            throw error;  // 或者返回一个特定的错误消息或对象，这取决于你如何处理这些错误
+        }
+    });
+    
     
     // 根据分站ID和传感器设备ID获取所有未被隐藏相关数据项的最后3w条
     ipcMain.handle('get-data-item-by-substation-and-device-last', async (event: IpcMainInvokeEvent, substationId: number, deviceId: number) => {
