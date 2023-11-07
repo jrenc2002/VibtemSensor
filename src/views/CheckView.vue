@@ -96,8 +96,6 @@
                         </div>
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-red-800">激活失败๑ᵒᯅᵒ๑</h3>
-
-
                         </div>
                         <div class="ml-auto pl-3">
                             <div class="-mx-1.5 -my-1.5">
