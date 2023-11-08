@@ -106,11 +106,10 @@ onMounted(() => {
 let hasInitializedSensorsData = false; // 外部标志
 
 const getAllData = () => {
-    const UPDATE_INTERVAL = 5000; // 10秒
+    const UPDATE_INTERVAL = 5000;
     
     function updateData() {
-        console.time("updateDataExecutionTime"); // 开始追踪时间
-        
+
         // 使用Promise.all确保所有分站数据同时异步更新
         const updatePromises = DeviceManage.deviceList.map(async (substation) => {
             try {
@@ -132,9 +131,7 @@ const getAllData = () => {
             console.error("更新某些分站数据时发生错误:", error);
             // 即使出现错误，也设置下一次更新
             setTimeout(updateData, UPDATE_INTERVAL);
-        }).finally(() => {
-            console.timeEnd("updateDataExecutionTime"); // 结束追踪时间并输出结果
-        });
+        })
     }
     
     // 首次调用

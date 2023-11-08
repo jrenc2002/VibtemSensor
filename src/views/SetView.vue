@@ -14,8 +14,9 @@
                 <div class=" w-[100%]  h-[100%]  bottom-0 grid grid-cols-1 gap-3 sm:grid-cols-5 overflow-auto">
     
                     <button v-for="machine in machines" :key="machine.id"
-                            :class="machine.select?'bg-[#F7BF46] border-gray-300 border-2  ':'border-gray-300'" class="relative flex items-center  rounded-lg border
-                    bg-white shadow-sm h-24  hover:border-[#F7BF46] hover:border-4"
+                            :class="machine.select?'bg-[#F7BF46] border-gray-300 border-2  ':' bg-white border-gray-300'"
+                            class="relative flex items-center  rounded-lg border
+                     shadow-sm h-24  hover:border-[#F7BF46] hover:border-4"
                             @click="machine.select=!machine.select;EditData=DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((machine.id-1) / 5)][(machine.id-1) % 5].current_data;console.log(machine.id);console.log(Math.floor((machine.id-1) / 5),(machine.id-1) % 5)">
                         <div class="min-w-0 flex-1 ">
                             <h5 class="text-xl font-none leading-6 text-gray-900 px-3">{{ machine.name }}</h5>
@@ -31,7 +32,7 @@
     
     
             <div
-                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border  ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">标准值</label>
                 <div class="flex ">
@@ -48,7 +49,7 @@
     
             </div>
             <div
-                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border  ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">振动报警上限</label>
                 <div class="flex ">
@@ -65,7 +66,7 @@
     
             </div>
             <div
-                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border  ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">振动标定系数</label>
                 <div class="flex ">
@@ -82,7 +83,7 @@
     
             </div>
             <div
-                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border  ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">温度报警上限</label>
                 <div class="flex ">
@@ -99,7 +100,7 @@
     
             </div>
             <div
-                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border ring-inset ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
+                    class="rounded-md mx-5 mt-5 px-3 h-[12%]  pt-1 shadow ring-1 border  ring-gray-300 focus-within:ring-6 focus-within:ring-indigo-600">
                 <label class="block text-xl font-medium text-gray-900 h-[40%]  flex items-center"
                        for="name">温度标定系数</label>
                 <div class="flex ">

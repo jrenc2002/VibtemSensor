@@ -124,9 +124,18 @@ const updateChart = () => {
 };
 
 
-watch(() => PopupMangerState.setData.alarmLimit, (newData) => {
-    alarmLimit.value = newData
-    updateChart();
+watch(() => PopupMangerState.setData.TempAlarm, (newData) => {
+    if (PopupMangerState.kind === '温度') {
+        alarmLimit.value = newData
+        updateChart();
+    }
+    
+})
+watch(() => PopupMangerState.setData.VibrationAlarm, (newData) => {
+    if (PopupMangerState.kind === '振动') {
+        alarmLimit.value = newData
+        updateChart();
+    }
 })
 watch(() => PopupMangerState.setData.Standard, (newData) => {
     standardValue.value = newData

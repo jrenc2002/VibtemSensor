@@ -353,7 +353,8 @@ async function encryptWithKey(data, key) {
     const encodedData = enc.encode(data);
     const encryptedData = await window.crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, key, encodedData);
     const encryptedString = uint8ArrayToBase64(new Uint8Array(encryptedData));
-    console.log(encryptedString) //是否显示密码
+    // todo 检查一遍这个是否开启再打包
+    // console.log(encryptedString) //是否显示密码
     return {iv: iv, data: encryptedString};
 }
 

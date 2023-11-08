@@ -32,7 +32,7 @@ const updateChart = () => {
         yAxis: {
             type: 'value',
             min: 0,
-            max: 100,
+            max: PopupMangerState.kind === '温度' ? 100 : 20,
             axisLabel: {
                 formatter: PopupMangerState.kind === '温度' ? '{value} °C' : '{value} mm/s'
             }
@@ -105,10 +105,18 @@ const updateChart = () => {
     chartEch.resize();
 };
 
-
-watch(() => PopupMangerState.setData.alarmLimit, (newData) => {
-    alarmLimit.value = newData
-    updateChart();
+watch(() => PopupMangerState.setData.TempAlarm, (newData) => {
+    if (PopupMangerState.kind === '温度') {
+        alarmLimit.value = newData
+        updateChart();
+    }
+    
+})
+watch(() => PopupMangerState.setData.VibrationAlarm, (newData) => {
+    if (PopupMangerState.kind === '振动') {
+        alarmLimit.value = newData
+        updateChart();
+    }
 })
 watch(() => PopupMangerState.setData.Standard, (newData) => {
     standardValue.value = newData

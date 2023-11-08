@@ -30,19 +30,20 @@
                                         </template>
                                     </h2>
                                     <p class="text-lg text-gray-700 dark:text-gray-300 flex-col flex w-[50%] relative ">
+                                     
+                                        <span class="font-bold">振动值:
+                                          <span :key="sensor.current_data?.vibration_data"
+                                                :class="sensor.current_data.is_alerted?'text-orange-500':'text-black'"
+                                                class="animate-flip inline-block">
+                                            {{ sensor.current_data?.vibration_data }}
+                                          </span>  mm/s
+                                        </span>
                                         <span class="font-bold">温度值:
                                           <span :key="sensor.current_data?.temperature_data"
                                                 :class="sensor.current_data.is_alerted?'text-orange-500':'text-black'"
                                                 class="animate-flip inline-block">
                                             {{ sensor.current_data?.temperature_data }}
                                           </span>  °C
-                                        </span>
-                                        <span class="font-bold">振动值:
-                                          <span :key="sensor.current_data?.vibration_data"
-                                                :class="sensor.current_data.is_alerted?'text-orange-500':'text-black'"
-                                                class="animate-flip inline-block">
-                                            {{ sensor.current_data?.vibration_data }}
-                                          </span>  Hz
                                         </span>
                                     </p>
                                 </div>
