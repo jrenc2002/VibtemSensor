@@ -44,7 +44,7 @@
                                             :class="[team.current ? 'text-[#1EA5FC] border-[#1EA5FC]' : 'text-gray-400 border-gray-200 group-hover:border-[#1EA5FC] group-hover:text-[#1EA5FC]',
                                             (DeviceManage.deviceList[team.id].socket===null)?'bg-gray-200 ':'',
                                             (DeviceManage.deviceList[team.id].socket!==null&&DeviceManage.deviceList[team.id].alarm===true)?'bg-red-400':'',
-                                            (DeviceManage.deviceList[team.id].socket!==null&&DeviceManage.deviceList[team.id].alarm!==true)?'bg-white':''
+                                            (DeviceManage.deviceList[team.id].socket!==null&&DeviceManage.deviceList[team.id].alarm!==true)?'bg-green-400':''
                                              ,'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium ']"
                                     >
                                       {{ team.id }}

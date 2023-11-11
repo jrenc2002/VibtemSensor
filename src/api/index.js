@@ -106,7 +106,12 @@ export const openDevice = async (index) => {
         return;
     }
     
+    
     const deviceInfo = DeviceManage.deviceList[index];
+    if (deviceInfo.socket) {
+        console.log(`设备 ${index} 的${deviceInfo.name} 连接已经打开`);
+        return;
+    }
     try {
         // 使用Promise.all进行并行连接
         const deviceSocket = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port);
@@ -136,10 +141,12 @@ export const openDevice = async (index) => {
  *
  * @param {Object} substation - 分站数据。
  */
+const readFailCounters = {};
+
 const fetchDataFromModbus = async (socket, substationIndex) => {
+    readFailCounters[substationIndex] = readFailCounters[substationIndex] || 0;
+    
     try {
-        
-        
         const allData = [];
         
         for (let i = 0; i < 3; i++) {
@@ -148,12 +155,25 @@ const fetchDataFromModbus = async (socket, substationIndex) => {
             allData.push(...fetchedData);
         }
         
+        // 读取成功，重置失败计数
+        readFailCounters[substationIndex] = 0;
         return allData;
     } catch (error) {
         console.error(`从分站${substationIndex} 读取数据时发生错误:`, error);
+        
+        readFailCounters[substationIndex] += 1;
+        
+        // 检查是否超过五次失败
+        if (readFailCounters[substationIndex] >= 3) {
+            await socket.close();  // 关闭 socket 连接
+            
+            return null;
+        }
+        
         return null;
     }
 };
+
 
 
 export const updateSubstationData = async (substationIndex) => {
@@ -162,12 +182,21 @@ export const updateSubstationData = async (substationIndex) => {
         console.error(`分站${substationIndex}读取数据时发生错误: 无数据返回`);
         return;
     }
+    if (deviceInfo.socket === null) {
+        console.error(`分站${substationIndex}的连接已关闭`);
+        return;
+    }
     const allData = await fetchDataFromModbus(deviceInfo.socket, substationIndex);
-    
+    if (allData === null) {
+        console.error(`分站${substationIndex}断开`);
+        deviceInfo.socket = null
+        return;
+    }
     if (!allData) {
         console.error(`分站${substationIndex}读取数据时发生错误: 无数据返回`);
         return;
     }
+    
     
     const sensorData = allData.slice(0, 60);
     const coefficients = allData.slice(60, 120);
