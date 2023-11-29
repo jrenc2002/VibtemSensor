@@ -106,7 +106,7 @@ onMounted(() => {
 let hasInitializedSensorsData = false; // 外部标志
 
 const getAllData = () => {
-    const UPDATE_INTERVAL = 5000;
+    const UPDATE_INTERVAL = 2000;
     
     function updateData() {
 
@@ -135,7 +135,7 @@ const getAllData = () => {
     }
     
     // 首次调用
-    setTimeout(updateData, 3000);
+    setTimeout(updateData, 2000);
 }
 
 // 初始化数据，从数据库获取传感器表

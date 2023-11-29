@@ -37,7 +37,6 @@ const DeviceManage = useDeviceManage();
 
 
 // 对设备管理器初始化-添加外部监听
-// TODO 将其数据读取改为socket存储，放置阻塞冲突。
 
 // 添加设备-对
 export const addDevice = async (ip, port, name) => {
@@ -180,6 +179,7 @@ export const updateSubstationData = async (substationIndex) => {
     const deviceInfo = DeviceManage.deviceList[substationIndex];
     if (!deviceInfo) {
         console.error(`分站${substationIndex}读取数据时发生错误: 无数据返回`);
+    
         return;
     }
     if (deviceInfo.socket === null) {
@@ -231,6 +231,7 @@ export const updateSubstationData = async (substationIndex) => {
             deviceInfo.sensorsData[boardIndex][sensorIndex].current_data.is_alerted = isAlerted;
             if (isAlerted === true) {
                 deviceInfo.alarm = true
+    
             }
             
             await window.Electron.ipcRenderer.invoke('add-data-item', {

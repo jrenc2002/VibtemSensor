@@ -1,3 +1,4 @@
+
 <template>
     <div :class="[AppGlobal.isDrawerState? 'w-[calc(94vw-15rem)]':'w-[94vw]']"
          class="transition-all duration-300 ease-in-out shadow bg-white rounded-2xl">
@@ -11,7 +12,7 @@
             </div>
             <div class=" font-bold text-3xl">
                 {{
-                    DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((props.deviceid - AppGlobal.pageChance * 30) / 5)][props.deviceid - AppGlobal.pageChance * 30 - 1].device_name
+                    DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((props.deviceid - AppGlobal.pageChance * 30 - 1) / 5)][(props.deviceid - AppGlobal.pageChance * 30 - 1) % 5].device_name
                 }}-{{ PopupMangerState.kind }}传感器
 
             </div>

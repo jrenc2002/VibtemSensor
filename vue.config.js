@@ -30,7 +30,7 @@ module.exports = defineConfig({
     configureWebpack: {
         devtool: 'cheap-module-source-map',
         plugins: [
-        
+    
             new JavaScriptObfuscator({
                 compact: true,
                 rotateStringArray: true,
@@ -41,13 +41,12 @@ module.exports = defineConfig({
                 sourceMapBaseUrl: '',
                 sourceMapFileName: '',
                 sourceMapMode: 'separate',
-            
+        
             }, [])
-    
+
         ]
     
     },
-    
     transpileDependencies: true,
     runtimeCompiler: true,
     pluginOptions: {

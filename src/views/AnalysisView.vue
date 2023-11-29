@@ -63,6 +63,7 @@ import {useDeviceManage} from "@/store/DeviceManage";
 import chart from '@/assets/image/chart.png'
 import {fft, util} from 'fft-js';
 
+import swal from 'sweetalert';
 
 const AppGlobal = useAppGlobal()
 const DeviceManage = useDeviceManage();
@@ -153,12 +154,19 @@ watch(() => DeviceManage.deviceList[AppGlobal.pageChance], (newdata) => {
 /* ——————————————————————————时间数据配置—————————————————————————— */
 let data;
 
-
 /* ——————————————————————————定时器时间函数配置—————————————————————————— */
 const deviceid = ref()
 const popManager = async (device_id, substation_id, kind) => {
     console.log(device_id, substation_id)
     deviceid.value = device_id
+    // console.log(deviceid.value)
+    // if (deviceid.value !== undefined) {
+    //     console.log(DeviceManage.deviceList[AppGlobal.pageChance].sensorsData,'sensorsData')
+    //     console.log(DeviceManage.deviceList,'deviceList')
+    //     console.log('deviceid.value',deviceid.value,'pageChance', AppGlobal.pageChance,'(deviceid.value - AppGlobal.pageChance * 30) / 5', Math.floor((deviceid.value - AppGlobal.pageChance * 30) / 5),'deviceid.value - AppGlobal.pageChance * 30 - 1', (deviceid.value - AppGlobal.pageChance * 30 - 1)%5)
+    //     console.log('data',DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((deviceid.value - AppGlobal.pageChance * 30-1) / 5)][(deviceid.value - AppGlobal.pageChance * 30 - 1)%5].device_name);
+    // }
+    
     await handleData(device_id, substation_id, kind)
     
 }
@@ -166,12 +174,27 @@ const handleData = async (device_id, substation_id, kind) => {
     await window.Electron.ipcRenderer.invoke('get-data-item-by-substation-and-device-last', substation_id, device_id)
         .then((res) => {
             try {
-            
+                if (res.length === 0) {
+                    swal({
+                        title: "报错",
+                        text: "读取数据为空",
+                        icon: "error",
+                    });
+                    console.log("读取数据为空:", res);
+                    return
+                }
                 // 先确保res是有效的数组
                 if (!Array.isArray(res)) {
-                    throw new Error("Received data is not an array");
+                    swal({
+                        title: "报错",
+                        text: "数据不是数组",
+                        icon: "error",
+                    });
+                    console.log("数据不是数组:", res);
+                    return
                 }
-            
+    
+    
                 // 这里将原始数据转换为需要的格式
                 let data;
                 if (kind === '振动') {
@@ -282,10 +305,20 @@ const handleData = async (device_id, substation_id, kind) => {
                 PopupMangerState.WaterFallData.categories = categories
                 
             } catch (error) {
-                console.error("An error occurred while processing the data:", error);
+                swal({
+                    title: "报错",
+                    text: "处理数据时错误",
+                    icon: "error",
+                });
+                console.log("An error occurred while processing the data:", error);
             }
         })
         .catch(error => {
+            swal({
+                title: "报错",
+                text: "从数据读取数据时错误",
+                icon: "error",
+            });
             console.log("Error fetching data:", error, '没找到数据');
         });
     
