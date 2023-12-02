@@ -275,13 +275,13 @@ export const sendData = async (substationIndex, deviceId, data, kind) => {
     // Determine the addressOffset based on deviceId
     let boardIndex = Math.floor((deviceId - 1) / 5);
     let sensorIndex = (deviceId - 1) % 5;
-    console.log("boardIndex", boardIndex, "sensorIndex", sensorIndex)
     
     let baseAddress;
     switch (kind) {
         case 'vibration_coefficient':
             baseAddress = 60; // Starting point for coefficients
             addressOffset = baseAddress + boardIndex * 10 + sensorIndex * 2;
+            
             break;
         case 'temperature_coefficient':
             baseAddress = 60; // Starting point for coefficients

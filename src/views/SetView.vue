@@ -163,9 +163,15 @@ const getSensorData = (index) => {
 };
 
 const confirm = async () => {
+    if (!SensorList.value || SensorList.value.length === 0) {
+        console.log('SensorList.value is empty');
+        return;
+    }
+    
     for (let sensor of SensorList.value) {
         if (sensor.select) {
-            const sensorData = getSensorData(sensor.id);  // 使用新的辅助函数
+            
+            const sensorData = getSensorData(sensor.id - 1);  // 使用新的辅助函数
             sensorData.vibration_threshold = Content.VibrationAlarm;
             sensorData.temperature_threshold = Content.TempAlarm;
             sensorData.VibrationCoefficent = Content.VibrationCoefficent;
