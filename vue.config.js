@@ -17,15 +17,7 @@ module.exports = defineConfig({
     },
     publicPath: './',
     devServer: {
-        host: '0.0.0.0',
-        // https:true,
-        port: 6103,
-        client: {
-            webSocketURL: 'ws://0.0.0.0:6103/ws',
-        },
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-        }
+        allowedHosts: 'all',
     },
     configureWebpack: {
         devtool: 'cheap-module-source-map',
@@ -92,4 +84,4 @@ module.exports = defineConfig({
     }
     
 })
-// 特地提醒:我为了让preload.js打包成功修改了他的串流库代码！！！
+// 特地提醒:我为了让preload.js打包成功修改了他的串流库serce;代码！！！
