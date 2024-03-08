@@ -4,7 +4,7 @@ import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router';
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/checkview',
+        redirect: '/mainview',
     },
     {
         path: '/homeview',
@@ -49,6 +49,15 @@ const routes: Array<RouteRecordRaw> = [
                     permiss: '1',
                 },
                 component: () => import(/* webpackChunkName: "login" */ '../views/AlarmView.vue'),
+            },
+            {
+                path: '/digitaltwin',
+                name: 'DigitalTwin',
+                meta: {
+                    title: '数字孪生演示',
+                    permiss: '1',
+                },
+                component: () => import(/* webpackChunkName: "login" */ '../views/DigitalTwin.vue'),
             },
 
 

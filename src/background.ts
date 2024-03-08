@@ -3,7 +3,7 @@
 
 // 从 electron 包中导入 app, protocol, 和 BrowserWindow
 // 这些是 Electron 的主要模块，用于创建和控制应用程序和窗口
-import {app, BrowserWindow, protocol} from 'electron'
+import {app, BrowserWindow, protocol,ipcMain} from 'electron'
 
 // 导入 createProtocol 来注册 app 协议，让 Electron 可以加载 app:// URLs
 import {createProtocol} from 'vue-cli-plugin-electron-builder/lib'
@@ -11,13 +11,16 @@ import {createInitDB} from './db-api'
 // 导入 electron-devtools-installer 包，用于在 Electron 应用中安装 Vue Devtools
 
 
+
+
 const path = require('path');
 // 判断当前是否是开发模式
 const isDevelopment = process.env.NODE_ENV !== 'production'
 // 注册 app 协议，必须在 app ready 之前完成
 protocol.registerSchemesAsPrivileged([
-  {scheme: 'app', privileges: {secure: true, standard: true}}
+  {scheme: 'app', privileges: {secure: true, standard: true,supportFetchAPI: true, corsEnabled: true, stream: true}}
 ])
+
 console.log(__dirname, path.join(__dirname, 'preload.js'))
 // 创建 Electron 窗口的异步函数
 async function createWindow() {
@@ -80,7 +83,18 @@ app.on('ready', async () => {
   //     console.error('Vue Devtools failed to install:', e)
   //   }
   // }
+  protocol.registerFileProtocol('app', (request, callback) => {
+    // 解析请求的URL，去掉协议部分，并解码
+    const url = request.url.substr('app://'.length);
+    const decodedUrl = decodeURIComponent(url);
+    
+    // 计算文件的实际路径。这里以您的项目结构为准来修改路径
+    const filePath = path.join(__dirname, decodedUrl);
+    console.log(filePath)
+    // 通过callback返回文件路径，Electron会加载并显示该文件
+    callback({ path: filePath });
 
+  });
   createWindow();
   createInitDB();
 })

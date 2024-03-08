@@ -25,7 +25,8 @@ const state = (): {
     deviceList: Device[];
 } => {
     return {
-        deviceList: []
+        deviceList: [
+        ]
     }
 }
 

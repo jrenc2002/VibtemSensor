@@ -1,5 +1,5 @@
 {
-  "name": "VibTempSensor",
+  "name": "DigitalTwinDomo",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -46,6 +46,7 @@
     "rebuild": "^0.1.2",
     "sqlite3": "^5.1.6",
     "sweetalert": "^2.1.2",
+    "three": "^0.162.0",
     "vant": "^4.7.1",
     "vue": "^3.2.13",
     "vue-class-component": "^8.0.0-0",

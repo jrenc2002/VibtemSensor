@@ -171,7 +171,7 @@
 <script lang="js" setup>
 import {useRoute} from 'vue-router'
 import {computed, onMounted, ref, watch} from 'vue'
-import {ChartBarIcon, Cog8ToothIcon, ServerStackIcon, TvIcon} from '@heroicons/vue/24/outline'
+import {ChartBarIcon, Cog8ToothIcon, ServerStackIcon, TvIcon,PuzzlePieceIcon} from '@heroicons/vue/24/outline'
 import {useAppGlobal} from '@/store/AppGlobal'
 import {useDeviceManage} from '@/store/DeviceManage'
 import DeviceContextMenu from "@/components/DeviceContextMenu";
@@ -209,7 +209,8 @@ const navigation = computed(() => [
     {name: '显示界面', href: '/mainview', icon: TvIcon, current: route.path === '/mainview'},
     {name: '分析界面', href: '/analysisview', icon: ChartBarIcon, current: route.path === '/analysisview'},
     {name: '设置界面', href: '/setiew', icon: Cog8ToothIcon, current: route.path === '/setiew'},
-    {name: '报警数据', href: '/alarmview', icon: ServerStackIcon, current: route.path === '/alarmview'}
+    {name: '报警数据', href: '/alarmview', icon: ServerStackIcon, current: route.path === '/alarmview'},
+    {name: '数字孪生演示', href: '/digitaltwin', icon: PuzzlePieceIcon, current: route.path === '/digitaltwin'}
 
 ])
 const showMenu = (event, deviceId) => {

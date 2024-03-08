@@ -55,23 +55,7 @@ export const addDevice = async (ip, port, name) => {
     }
     const deviceInfo = DeviceManage.deviceList[index];
     deviceInfo.socket = null;
-    try {
-        // 使用Promise.all进行并行连接
-        const deviceSocket = window.useModbusAPI.new(ip, port);
-    
-        deviceSocket.connect(deviceInfo.ip, deviceInfo.port).then(() => {
-            console.log('连接成功', deviceSocket); // 连接成功
-            deviceSocket.on('connect', () => {
-                deviceInfo.socket = deviceSocket; // 现在deviceInfo.socket引用modbusInstance
-                console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接成功`);
-            });
-        }).catch(err => {
-            console.error('连接失败:', err); // 连接失败
-        });
-    
-    } catch (error) {
-        console.error("设备连接中发生错误：", error);
-    }
+
 }
 
 
@@ -115,18 +99,9 @@ export const openDevice = async (index) => {
         // 使用Promise.all进行并行连接
         const deviceSocket = window.useModbusAPI.new(deviceInfo.ip, deviceInfo.port);
         console.log(deviceInfo.ip, deviceInfo.port, deviceSocket)
-        deviceSocket.on('connect', () => {
-            deviceInfo.socket = deviceSocket; // 现在deviceInfo.socket引用modbusInstance
-            console.log(deviceInfo.socket, DeviceManage.deviceList[index].socket)
-            console.log(`${deviceInfo.ip}:${deviceInfo.port} 控制板ID ${name} 连接成功`);
-        });
+
     
-        deviceSocket.connect(deviceInfo.ip, deviceInfo.port).then(() => {
-            console.log('连接成功', deviceSocket); // 连接成功
-        
-        }).catch(err => {
-            console.error('连接失败:', err); // 连接失败
-        });
+
     
     } catch (error) {
         console.error("设备连接中发生错误：", error);

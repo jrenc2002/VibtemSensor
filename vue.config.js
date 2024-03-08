@@ -33,7 +33,7 @@ module.exports = defineConfig({
                 sourceMapBaseUrl: '',
                 sourceMapFileName: '',
                 sourceMapMode: 'separate',
-        
+
             }, [])
 
         ]
@@ -47,10 +47,11 @@ module.exports = defineConfig({
             builderOptions: {
                 asar: true,
                 // build配置在此处
-                productName: 'VibTempSensor-KaoMa',
+                productName: 'DigitalTwinDomo',
                 // options placed here will be merged with default configuration and passed to electron-builder
                 extraResources: [
-                    "./src/database.db"
+                    "./src/database.db",
+                    "./public/**/*",
                 ],
                 win: {  // 更改build下选项
                     icon: "./src/assets/image/icon.ico",
