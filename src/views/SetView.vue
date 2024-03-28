@@ -14,12 +14,12 @@
                 <div class=" w-[100%]  h-[100%]  bottom-0 grid grid-cols-1 gap-3 sm:grid-cols-5 overflow-auto">
     
                     <button v-for="machine in machines" :key="machine.id"
-                            :class="machine.select?'bg-[#F7BF46] border-gray-300 border-2  ':' bg-white border-gray-300'"
+                            :class="machine.select?'bg-[rgb(26,133,211)] border-gray-300 border-2 text-white ':' bg-white border-gray-300'"
                             class="relative flex items-center  rounded-lg border
-                     shadow-sm h-24  hover:border-[#F7BF46] hover:border-4"
+                     shadow-sm h-24  hover:border-[rgb(26,133,211)] hover:border-4"
                             @click="machine.select=!machine.select;EditData=DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((machine.id-1) / 5)][(machine.id-1) % 5].current_data;console.log(machine.id);console.log(Math.floor((machine.id-1) / 5),(machine.id-1) % 5)">
                         <div class="min-w-0 flex-1 ">
-                            <h5 class="text-xl font-none leading-6 text-gray-900 px-3">{{ machine.name }}</h5>
+                            <h5 class="text-xl font-none leading-6 px-3">{{ machine.name }}</h5>
                         </div>
                     </button>
 
@@ -205,20 +205,26 @@ const updateData = () => {
     }));
 }
 
+
 let machines = computed(() => SensorList.value);
 
 watch(() => AppGlobal.pageChance, () => {
     updateData();
 })
-watch(() => DeviceManage.deviceList[AppGlobal.pageChance], (newdata) => {
-    updateData();
+watch(() => DeviceManage.deviceList[AppGlobal.pageChance], async (newdata) => {
+    await updateData();
+    watch(() => DeviceManage.deviceList[AppGlobal.pageChance].sensorsData, (newdata) => {
+        updateData();
+    }, {deep: true})
 })
 
 onMounted(() => {
     updateData();
     setTimeout(() => {
         updateData();
+    
     }, 100)
+    
 });
 
 </script>

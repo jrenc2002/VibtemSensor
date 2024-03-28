@@ -8,9 +8,9 @@
                     <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                         <!-- Iterate over sensor boards -->
                         <div v-for="(sensorsBoard, index) in sensorBoards" :key="index"
-                             class="border text-card-foreground bg-white dark:bg-gray-700 shadow-md rounded-lg overflow-hidden ">
-                            <div class="flex flex-row items-center justify-between space-y-0 bg-gray-200 dark:bg-gray-600 p-4">
-                                <h3 class="tracking-tight text-sm font-medium text-gray-900 dark:text-gray-100">
+                             class="border text-card-foreground bg-white  shadow-md rounded-lg overflow-hidden ">
+                            <div class="flex flex-row items-center justify-between space-y-0 bg-[rgb(26,133,211)] dark:bg-gray-600 p-4">
+                                <h3 class="tracking-tight text-sm font-medium text-white dark:text-gray-100">
                                     控制板{{ index + 1 }}号</h3>
                             </div>
                             <div class="px-4 py-2">
@@ -18,7 +18,7 @@
                                 <div v-for="(sensor, sensorIndex) in sensorsBoard" :key="sensor.device_id"
                                      :class="{'border-b': sensorIndex < sensorsBoard.length - 1, 'border-gray-300': sensorIndex < sensorsBoard.length - 1}"
                                      class="flex justify-between py-1 ">
-                                    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 w-[40%] relative"
+                                    <h2 class="text-lg font-bold text-gray-900  w-[40%] relative"
                                         @dblclick="enableEditing(sensor)">
                                         <template v-if="editingSensorId === sensor.device_id">
                                             <input v-model="sensor.newName"
@@ -104,8 +104,7 @@ const changeSensorName = async (sensor, substationId) => {
             sensor.device_name = sensor.newName;
             // console.log(sensor.device_name,substationId, sensor.device_id, sensor.newName)
             editingSensorId.value = null; // Disable editing mode
-            const sensors = await window.Electron.ipcRenderer.invoke('get-all-sensors-by-substation', substationId);
-            
+    
         }
     } catch (error) {
         console.error("Error updating sensor name:", error);
