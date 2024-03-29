@@ -11,7 +11,7 @@
                              class="border text-card-foreground bg-white  shadow-md rounded-lg overflow-hidden ">
                             <div class="flex flex-row items-center justify-between space-y-0 bg-[rgb(26,133,211)] dark:bg-gray-600 p-4">
                                 <h3 class="tracking-tight text-sm font-medium text-white dark:text-gray-100">
-                                    控制板{{ index + 1 }}号</h3>
+                                    {{ index + 1 }}号采集器</h3>
                             </div>
                             <div class="px-4 py-2">
                                 <!-- Display each sensor in the current board -->
@@ -42,7 +42,7 @@
                                           <span :key="sensor.current_data?.temperature_data"
                                                 :class="sensor.current_data.is_alerted?'text-orange-500':'text-black'"
                                                 class="animate-flip inline-block">
-                                            {{ sensor.current_data?.temperature_data }}
+                                            {{ parseFloat(sensor.current_data?.temperature_data) > 0.3 || parseFloat(sensor.current_data?.temperature_data) < -0.3 ? sensor.current_data?.temperature_data : 0 }}
                                           </span>  °C
                                         </span>
                                     </p>
