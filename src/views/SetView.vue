@@ -197,12 +197,15 @@ const confirm = async () => {
 };
 
 const updateData = () => {
+    
     extractedSensors.value = DeviceManage.deviceList[AppGlobal.pageChance]?.sensorsData?.flatMap(board => board) || [];
     SensorList.value = extractedSensors.value.map((sensor, index) => ({
         id: index + 1,
         name: sensor.device_name,
         select: false
     }));
+    
+    
 }
 
 
@@ -211,12 +214,7 @@ let machines = computed(() => SensorList.value);
 watch(() => AppGlobal.pageChance, () => {
     updateData();
 })
-watch(() => DeviceManage.deviceList[AppGlobal.pageChance], async (newdata) => {
-    await updateData();
-    watch(() => DeviceManage.deviceList[AppGlobal.pageChance].sensorsData, (newdata) => {
-        updateData();
-    }, {deep: true})
-})
+
 
 onMounted(() => {
     updateData();
