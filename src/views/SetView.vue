@@ -10,20 +10,21 @@
             
             </div>
             <div class=" w-[100%] h-[88%] overflow-y-auto pl-4 pl-5 pr-5 overflow-auto ">
-                
-                <div class=" w-[100%]  h-[100%]  bottom-0 grid grid-cols-1 gap-3 sm:grid-cols-5 overflow-auto">
     
-                    <button v-for="machine in machines" :key="machine.id"
-                            :class="machine.select?'bg-[rgb(26,133,211)] border-gray-300 border-2 text-white ':' bg-white border-gray-300'"
-                            class="relative flex items-center  rounded-lg border
+                <div class="pt-3 w-[100%]  h-[70%]  bottom-0 grid grid-cols-1 gap-3 sm:grid-cols-5 overflow-auto">
+                    <template v-for="(machine,machineIndex) in machines" :key="machine.id">
+                        <template v-if="machineIndex<20">
+                            <button
+                                    :class="machine.select?'bg-[rgb(26,133,211)] border-gray-300 border-2 text-white ':' bg-white border-gray-300'"
+                                    class="relative flex items-center  rounded-lg border
                      shadow-sm h-24  hover:border-[rgb(26,133,211)] hover:border-4"
-                            @click="machine.select=!machine.select;EditData=DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((machine.id-1) / 5)][(machine.id-1) % 5].current_data;console.log(machine.id);console.log(Math.floor((machine.id-1) / 5),(machine.id-1) % 5)">
-                        <div class="min-w-0 flex-1 ">
-                            <h5 class="text-xl font-none leading-6 px-3">{{ machine.name }}</h5>
-                        </div>
-                    </button>
-
-
+                                    @click="machine.select=!machine.select;EditData=DeviceManage.deviceList[AppGlobal.pageChance].sensorsData[Math.floor((machine.id-1) / 5)][(machine.id-1) % 5].current_data;console.log(machine.id);console.log(Math.floor((machine.id-1) / 5),(machine.id-1) % 5)">
+                                <div class="min-w-0 flex-1 ">
+                                    <h5 class="text-xl font-none leading-6 px-3">{{ machine.name }}</h5>
+                                </div>
+                            </button>
+                        </template>
+                    </template>
                 </div>
             </div>
 

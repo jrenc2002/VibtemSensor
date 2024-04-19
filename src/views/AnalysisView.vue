@@ -11,16 +11,25 @@
         <div class="rounded-2xl bg-white w-[100%] h-[100%]  bottom-0  shadow p-4 overflow-auto ">
             
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 ">
-                <div v-for="board in machines" :key="board.id">
-                    <div v-for="machine in board" :key="machine.device_id"
-                         class="relative flex items-center space-x-3 rounded-lg mt-3 border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
-                    >
-                        
-                        <div class="min-w-0 flex-1">
-                            <a class="focus:outline-none flex-col">
-                                <h5 class="text-xl font-semibold leading-6 text-gray-900">{{ machine.device_name }}</h5>
-                                <div class=" sm:grid-cols-2 grid grid-cols-2 gap-4 ">
-                                    <dl class="mt-5 grid grid-cols-1 gap-5 ">
+    
+                <template v-for="(board,boardIndex) in machines" :key="board.id">
+        
+                    <template v-if="boardIndex<4">
+            
+                        <div>
+                
+                
+                            <div v-for="machine in board" :key="machine.device_id"
+                                 class="relative flex items-center space-x-3 rounded-lg mt-3 border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
+                            >
+                    
+                                <div class="min-w-0 flex-1">
+                                    <a class="focus:outline-none flex-col">
+                                        <h5 class="text-xl font-semibold leading-6 text-gray-900">{{
+                                                machine.device_name
+                                            }}</h5>
+                                        <div class=" sm:grid-cols-2 grid grid-cols-2 gap-4 ">
+                                            <dl class="mt-5 grid grid-cols-1 gap-5 ">
                                         
                                         <div class="overflow-hidden border border-gray-100 rounded-lg bg-white px-1 py-1
                                     hover:bg-neutral-100 hover:cursor-pointer hover:border-indigo-500 hover:border-2 shadow "
@@ -40,14 +49,17 @@
                                             <div class=" leading-4 mt-2 h-6 flex justify-center items-center w-full text-center">
                                                 温度
                                             </div>
-        
+
                                         </div>
                                     </dl>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
+                            </div>
+            
                         </div>
-                    </div>
-                </div>
+                    </template>
+                </template>
             </div>
         </div>
     </div>
